@@ -1,0 +1,3 @@
+-l1,2,8,3.0 -f44,0,0,10.0
+-sC:\Users\MasoodAkram\Desktop\MorphoMeasure_2.0\tmp\0001_1060-5814-1310.CNG_Fractal_Dim.csv -R
+C:\Users\MasoodAkram\Desktop\MorphoMeasure_2.0\swc_files\0001_1060-5814-1310.CNG.swc
