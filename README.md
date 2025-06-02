@@ -5,6 +5,7 @@
 # ABOVE ARE THE CHANGES MADE. 
 
 # Try to work on the collection of features if you have time on 06/02/2025
+# Also think of adding TREES toolbox features
 
 # MorphoMeasure: Automated Morphometric Feature Extraction
 
