@@ -4,6 +4,8 @@
 
 # ABOVE ARE THE CHANGES MADE. 
 
+# Try to work on the collection of features if you have time on 06/02/2025
+
 # MorphoMeasure: Automated Morphometric Feature Extraction
 
 This repository provides a Python workflow for automated extraction of morphometric features from neuron morphology files (SWC format) using [L-Measure](http://cng.gmu.edu:8080/Lm/help/index.htm) (`Lm.exe`). The script processes multiple SWC files, extracts a comprehensive set of features, and saves the results as CSV files for downstream analysis.
