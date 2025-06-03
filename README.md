@@ -7,7 +7,7 @@
 # Try to work on the collection of features if you have time on 06/02/2025
 # Also think of adding TREES toolbox features
 # Antoher thing that can be added are the separate measures of apical dendrites based on tag 4
-# One more thing that you should consider adding are the measurements based on different neuronal trees
+# One more thing that you should consider adding are the measurements based on different neuronal trees. These trees will measure each stem separately
 
 # MorphoMeasure: Automated Morphometric Feature Extraction
 
