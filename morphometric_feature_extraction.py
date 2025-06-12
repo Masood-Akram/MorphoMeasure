@@ -38,7 +38,7 @@ features = {
     "Contraction_internal": "-l1,2,8,3.0 -l1,3,19,1.0 -f24,0,0,10.0"
 }
 
-# === Paths ===
+# Paths
 swc_dir = r"C:\Users\MasoodAkram\Desktop\GitHub\MorphoMeasure\swc_files"
 output_dir = r"C:\Users\MasoodAkram\Desktop\GitHub\MorphoMeasure\Measurements"
 tmp_dir = r"C:\Users\MasoodAkram\Desktop\GitHub\MorphoMeasure\tmp"
@@ -47,7 +47,6 @@ lm_exe_path = r"C:\Users\MasoodAkram\Desktop\GitHub\MorphoMeasure\Lm.exe"
 os.makedirs(output_dir, exist_ok=True)
 os.makedirs(tmp_dir, exist_ok=True)
 
-# === Utility functions for summary ===
 def abel(df, path_col, contract_col):
     if path_col in df.columns and contract_col in df.columns:
         p = pd.to_numeric(df[path_col], errors="coerce")
@@ -60,7 +59,6 @@ def bapl(df, col):
         return pd.to_numeric(df[col], errors="coerce").mean()
     return None
 
-# Output order (customize as needed)
 output_order = [
     "Soma_Surface", "N_stems", "N_bifs", "N_branch", "N_tips", "Width", "Height", "Depth",
     "Diameter", "Length", "Surface", "Volume",
@@ -73,45 +71,39 @@ output_order = [
     "BAPL", "BAPL_Terminal", "BAPL_Internal"
 ]
 
-# === MAIN PIPELINE ===
+# Store all summaries for the combined CSV
+all_summaries = {}
+
 for swc_filename in os.listdir(swc_dir):
     if swc_filename.endswith(".swc"):
         swc_path = os.path.join(swc_dir, swc_filename)
         swc_base = os.path.splitext(swc_filename)[0]
-        print(f"\n🧠 Processing SWC file: {swc_filename}")
 
-        # Extract features branch-by-branch
         feature_dfs = []
         for feature_name, feature_flags in features.items():
-            print(f"🔧 Feature: {feature_name}")
             temp_output_path = os.path.join(tmp_dir, f"{swc_base}_{feature_name}.csv")
             lmin_path = os.path.join(tmp_dir, "Lmin.txt")
             param_lines = f"{feature_flags}\n-s{temp_output_path} -R\n{swc_path}\n"
             with open(lmin_path, "w") as f:
                 f.write(param_lines)
-            result = subprocess.run([lm_exe_path, lmin_path], capture_output=True, text=True)
+            subprocess.run([lm_exe_path, lmin_path], capture_output=True, text=True)
             if os.path.exists(temp_output_path):
                 try:
                     df_raw = pd.read_csv(temp_output_path, header=None)
                     df_clean = df_raw[pd.to_numeric(df_raw[0], errors='coerce').notna()]
                     df_clean.columns = [feature_name]
                     feature_dfs.append(df_clean.reset_index(drop=True))
-                    print(f"✅ Loaded {len(df_clean)} clean values")
-                except Exception as e:
-                    print(f"⚠️ Error reading {feature_name}: {e}")
-            else:
-                print(f"❌ No output for {feature_name}")
+                except Exception:
+                    pass
 
-        # Save full branch-by-branch morphometrics
+        # Save branch-by-branch morphometrics
         if feature_dfs:
             df_combined = pd.concat(feature_dfs, axis=1)
             morpho_outfile = os.path.join(output_dir, f"Branch_Morphometrics_{swc_base}.csv")
             df_combined.to_csv(morpho_outfile, index=False)
-            print(f"📁 Saved: {morpho_outfile}")
 
             # --- Compute summary ---
             summary = {}
-            # Logic for summary features (edit to match your requirements)
             logic = {
                 "Soma_Surface":        ("first",   "Soma_Surface"),
                 "N_stems":             ("sum",     "N_stems"),
@@ -142,7 +134,6 @@ for swc_filename in os.listdir(swc_dir):
                 "Helix":               ("mean",    "Helix"),
                 "Fractal_Dim":         ("mean",    "Fractal_Dim"),
             }
-            # Run summary logic
             for col, (op, out_label) in logic.items():
                 if col in df_combined.columns:
                     col_numeric = pd.to_numeric(df_combined[col], errors="coerce")
@@ -154,12 +145,10 @@ for swc_filename in os.listdir(swc_dir):
                         summary[out_label] = col_numeric.max()
                     elif op == "first":
                         summary[out_label] = col_numeric.iloc[0] if not col_numeric.empty else None
-            # Sum and Max for EucDistance and PathDistance
             if "EucDistance" in df_combined.columns:
                 summary["Sum_EucDistance"] = pd.to_numeric(df_combined["EucDistance"], errors="coerce").sum()
             if "PathDistance" in df_combined.columns:
                 summary["Sum_PathDistance"] = pd.to_numeric(df_combined["PathDistance"], errors="coerce").sum()
-            # ABEL/BAPL logic
             summary["ABEL"] = abel(df_combined, "Branch_pathlength", "Contraction")
             summary["ABEL_Terminal"] = abel(df_combined, "Branch_pathlength_terminal", "Contraction_terminal")
             summary["ABEL_internal"] = abel(df_combined, "Branch_pathlength_internal", "Contraction_internal")
@@ -167,25 +156,23 @@ for swc_filename in os.listdir(swc_dir):
             summary["BAPL_Terminal"] = bapl(df_combined, "Branch_pathlength_terminal")
             summary["BAPL_Internal"] = bapl(df_combined, "Branch_pathlength_internal")
 
-            # Output summary in order with "Features" and swc_filename column
-            output_rows = []
-            for feature in output_order:
-                if feature in summary:
-                    output_rows.append([feature, summary[feature]])
-            df_output = pd.DataFrame(output_rows, columns=["Features", swc_filename])
-            morpho_summary_outfile = os.path.join(output_dir, f"Morphometrics_{swc_base}.csv")
-            df_output.to_csv(morpho_summary_outfile, index=False)
-            print(f"📁 Saved summary: {morpho_summary_outfile}")
+            # Save summary for the neuron
+            all_summaries[swc_filename] = summary
 
-        else:
-            print(f"⚠️ No features extracted for {swc_filename}")
+# Build and save the All_Morphometrics.csv
+if all_summaries:
+    # Make DataFrame: rows=features, columns=neurons
+    df_all = pd.DataFrame(all_summaries)
+    df_all.insert(0, "Features", df_all.index)
+    df_all.reset_index(drop=True, inplace=True)
+    all_morpho_file = os.path.join(output_dir, "All_Morphometrics.csv")
+    df_all = df_all[["Features"] + [fn for fn in sorted(all_summaries.keys())]]
+    df_all.to_csv(all_morpho_file, index=False)
 
 # Clean up tmp folder
 for fname in os.listdir(tmp_dir):
     if fname.endswith(".csv"):
         try:
             os.remove(os.path.join(tmp_dir, fname))
-        except Exception as e:
-            print(f"⚠️ Failed to delete {fname}: {e}")
-print("\n🧹 All temporary CSVs cleaned up from tmp folder.")
-
+        except Exception:
+            pass
