@@ -4,7 +4,8 @@
 2. Extract features with tag 3 (basal), tag (apical) separately, and give output separately.
 3. Extract features with tag 7 (glia), and should be specified in the package.
 4. PCA should be applied to only Height, Width, and Depth (takle help from a previous version). 
-5. 
+5. Make a python package which will help run this without using L-measure and Java.
+6. Try to incorporate TREES toolbox features as well, but first check their licensing. 
 
 
 # THIS PROJECT WILL BECOME A PYTHON PACKAGE BY THE WEEK OF 06/02/2025
