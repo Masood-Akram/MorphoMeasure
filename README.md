@@ -3,6 +3,8 @@
 1. Extract features with tag 3 (basal), tag (apical) together, and give output altogether.
 2. Extract features with tag 3 (basal), tag (apical) separately, and give output separately.
 3. Extract features with tag 7 (glia), and should be specified in the package.
+4. PCA should be applied to only Height, Width, and Depth (takle help from a previous version). 
+5. 
 
 
 # THIS PROJECT WILL BECOME A PYTHON PACKAGE BY THE WEEK OF 06/02/2025
