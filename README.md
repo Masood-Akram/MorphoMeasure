@@ -1,7 +1,8 @@
 # Here are the steps that will be performed moving forward. 
 
-1. Extract features with tag 3 (basal), tag (apical) separately, and give output separately.
+1. Extract features with tag 3 (basal), tag (apical) together, and give output altogether.
 2. Extract features with tag 3 (basal), tag (apical) separately, and give output separately.
+3. Extract features with tag 7 (glia), and should be specified in the package.
 
 
 # THIS PROJECT WILL BECOME A PYTHON PACKAGE BY THE WEEK OF 06/02/2025
