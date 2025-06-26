@@ -94,7 +94,6 @@ if __name__ == "__main__":
         swc_path = os.path.join(swc_dir, swc_filename)
         swc_base = os.path.splitext(swc_filename)[0]
 
-        # --------- Per-tag extraction and saving ---------
         per_tag_dfs = {}
         for tag in tags:
             feature_dfs = []
@@ -180,45 +179,32 @@ if __name__ == "__main__":
                 summary["BAPL_Internal"] = bapl(df_tag, "Branch_pathlength_internal")
                 all_summaries[tag][swc_filename] = summary
 
-        # --------- Combined branch-by-branch (robust union) ---------
-        # Combine per-tag dataframes (rows/branches) for union
-                if per_tag_dfs:
-                    tags_found = list(per_tag_dfs.keys())
-                    # Only write combined branch-by-branch file if there's only one tag
-                    if len(tags_found) == 1:
-                        combined_dir = os.path.join(output_dir, "combined_tags")
-                        os.makedirs(combined_dir, exist_ok=True)
-                        df_combined_branch = per_tag_dfs[tags_found[0]]
-                        morpho_outfile = os.path.join(combined_dir, f"Branch_Morphometrics_{swc_base}.csv")
-                        df_combined_branch.to_csv(morpho_outfile, index=False)
-                    # Always build combined summary in memory for All_Morphometrics.csv
-                    df_combined = pd.concat(list(per_tag_dfs.values()), axis=0, ignore_index=True)
-                    # ... then build your summary as usual ...
-                    summary = {}
-                    for col, (op, out_label) in logic.items():
-                        if col in df_combined.columns:
-                            col_numeric = pd.to_numeric(df_combined[col], errors="coerce")
-                            if op == "sum":
-                                summary[out_label] = col_numeric.sum()
-                            elif op == "mean":
-                                summary[out_label] = col_numeric.mean()
-                            elif op == "max":
-                                summary[out_label] = col_numeric.max()
-                            elif op == "first":
-                                summary[out_label] = col_numeric.iloc[0] if not col_numeric.empty else None
-                    if "EucDistance" in df_combined.columns:
-                        summary["Sum_EucDistance"] = pd.to_numeric(df_combined["EucDistance"], errors="coerce").sum()
-                    if "PathDistance" in df_combined.columns:
-                        summary["Sum_PathDistance"] = pd.to_numeric(df_combined["PathDistance"], errors="coerce").sum()
-                    summary["ABEL"] = abel(df_combined, "Branch_pathlength", "Contraction")
-                    summary["ABEL_Terminal"] = abel(df_combined, "Branch_pathlength_terminal", "Contraction_terminal")
-                    summary["ABEL_internal"] = abel(df_combined, "Branch_pathlength_internal", "Contraction_internal")
-                    summary["BAPL"] = bapl(df_combined, "Branch_pathlength")
-                    summary["BAPL_Terminal"] = bapl(df_combined, "Branch_pathlength_terminal")
-                    summary["BAPL_Internal"] = bapl(df_combined, "Branch_pathlength_internal")
-                    all_summaries_combined[swc_filename] = summary
-
-
+        # --------- Combined summary (no combined_tags folder!) ---------
+        if per_tag_dfs:
+            df_combined = pd.concat(list(per_tag_dfs.values()), axis=0, ignore_index=True)
+            summary = {}
+            for col, (op, out_label) in logic.items():
+                if col in df_combined.columns:
+                    col_numeric = pd.to_numeric(df_combined[col], errors="coerce")
+                    if op == "sum":
+                        summary[out_label] = col_numeric.sum()
+                    elif op == "mean":
+                        summary[out_label] = col_numeric.mean()
+                    elif op == "max":
+                        summary[out_label] = col_numeric.max()
+                    elif op == "first":
+                        summary[out_label] = col_numeric.iloc[0] if not col_numeric.empty else None
+            if "EucDistance" in df_combined.columns:
+                summary["Sum_EucDistance"] = pd.to_numeric(df_combined["EucDistance"], errors="coerce").sum()
+            if "PathDistance" in df_combined.columns:
+                summary["Sum_PathDistance"] = pd.to_numeric(df_combined["PathDistance"], errors="coerce").sum()
+            summary["ABEL"] = abel(df_combined, "Branch_pathlength", "Contraction")
+            summary["ABEL_Terminal"] = abel(df_combined, "Branch_pathlength_terminal", "Contraction_terminal")
+            summary["ABEL_internal"] = abel(df_combined, "Branch_pathlength_internal", "Contraction_internal")
+            summary["BAPL"] = bapl(df_combined, "Branch_pathlength")
+            summary["BAPL_Terminal"] = bapl(df_combined, "Branch_pathlength_terminal")
+            summary["BAPL_Internal"] = bapl(df_combined, "Branch_pathlength_internal")
+            all_summaries_combined[swc_filename] = summary
 
     # ---- Build and save the All_Morphometrics.csv ----
     if all_summaries_combined:
