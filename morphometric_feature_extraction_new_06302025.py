@@ -82,8 +82,11 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(description="Extract morphometric features from SWC files using L-Measure.")
     parser.add_argument('--tag', nargs='+', required=True, help='Tags to process (e.g., 3.0 4.0)')
+    parser.add_argument('--features', choices=['all', 'branch', 'combined'], default='all',
+                        help='Which outputs to produce: all (summary only), branch (branch-by-branch only), combined (both)')
     args = parser.parse_args()
     tags = args.tag
+    features_mode = args.features
 
     all_summaries_combined = {}
     all_summaries = {t: {} for t in tags}
@@ -120,9 +123,10 @@ if __name__ == "__main__":
                         pass
             if feature_dfs:
                 df_tag = pd.concat(feature_dfs, axis=1)
-                # Save branch-by-branch per tag
-                morpho_outfile = os.path.join(tag_dir, f"Branch_Morphometrics_{swc_base}.csv")
-                df_tag.to_csv(morpho_outfile, index=False)
+                if features_mode in ['branch', 'combined']:
+                    # Save branch-by-branch per tag
+                    morpho_outfile = os.path.join(tag_dir, f"Branch_Morphometrics_{swc_base}.csv")
+                    df_tag.to_csv(morpho_outfile, index=False)
                 per_tag_dfs[tag] = df_tag
                 # ---- Compute per-tag summary ----
                 summary = {}
@@ -180,7 +184,7 @@ if __name__ == "__main__":
                 all_summaries[tag][swc_filename] = summary
 
         # --------- Combined summary (no combined_tags folder!) ---------
-        if per_tag_dfs:
+        if per_tag_dfs and features_mode in ['all', 'combined']:
             df_combined = pd.concat(list(per_tag_dfs.values()), axis=0, ignore_index=True)
             summary = {}
             for col, (op, out_label) in logic.items():
@@ -207,7 +211,7 @@ if __name__ == "__main__":
             all_summaries_combined[swc_filename] = summary
 
     # ---- Build and save the All_Morphometrics.csv ----
-    if all_summaries_combined:
+    if features_mode in ['all', 'combined'] and all_summaries_combined:
         neuron_names = sorted(all_summaries_combined.keys())
         result_frames = []
         for neuron in neuron_names:
@@ -241,3 +245,4 @@ if __name__ == "__main__":
                 os.remove(os.path.join(tmp_dir, fname))
             except Exception:
                 pass
+
