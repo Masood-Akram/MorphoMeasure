@@ -329,39 +329,48 @@ if __name__ == "__main__":
         single_tag_mode = (len(tags) == 1)
         for neuron in neuron_names:
             data = {}
-            comb = all_summaries_combined[neuron]
-            data["combined"] = comb
-            # For single tag, only include the relevant tag
-            tag_columns = []
             if single_tag_mode:
+                # Only the tag's measurements, not combined
                 tag_label = TAG_LABELS.get(tags[0], f"tag_{tags[0]}")
-                tag_columns = [tag_label]
                 val = all_summaries[tags[0]].get(neuron, {})
                 data[tag_label] = val
+                df = pd.DataFrame(data)
+                df.columns = [tag_label]
+                df.insert(0, "Features", df.index)
+                df.reset_index(drop=True, inplace=True)
+                df["Neuron"] = neuron
+                result_frames.append(df)
             else:
-                # Multi-tag: include all tags
+                # Multi-tag: include combined and all tags
+                comb = all_summaries_combined[neuron]
+                data["combined"] = comb
+                tag_columns = []
                 for tag in tags:
                     tag_label = TAG_LABELS.get(tag, f"tag_{tag}")
                     tag_columns.append(tag_label)
                     val = all_summaries[tag].get(neuron, {})
                     data[tag_label] = val
-            df = pd.DataFrame(data)
-            df.columns = ["combined"] + tag_columns
-            df.insert(0, "Features", df.index)
-            df.reset_index(drop=True, inplace=True)
-            df["Neuron"] = neuron
-            result_frames.append(df)
+                df = pd.DataFrame(data)
+                df.columns = ["combined"] + tag_columns
+                df.insert(0, "Features", df.index)
+                df.reset_index(drop=True, inplace=True)
+                df["Neuron"] = neuron
+                result_frames.append(df)
         all_features = output_order
         df_out = pd.DataFrame({"Features": all_features})
         for df in result_frames:
             neuron = df["Neuron"][0].replace(".swc", "")
-            # Only include the columns needed for the current mode
-            cols_for_this = ["combined"] + ([TAG_LABELS.get(tags[0], f"tag_{tags[0]}")] if single_tag_mode else [TAG_LABELS.get(tag, f"tag_{tag}") for tag in tags])
-            for col in cols_for_this:
-                df1 = df.set_index("Features")[col]
-                df_out[f"{neuron}_{col}"] = df1.reindex(all_features).values
+            if single_tag_mode:
+                tag_label = TAG_LABELS.get(tags[0], f"tag_{tags[0]}")
+                df1 = df.set_index("Features")[tag_label]
+                df_out[f"{neuron}_{tag_label}"] = df1.reindex(all_features).values
+            else:
+                for col in ["combined"] + [TAG_LABELS.get(tag, f"tag_{tag}") for tag in tags]:
+                    df1 = df.set_index("Features")[col]
+                    df_out[f"{neuron}_{col}"] = df1.reindex(all_features).values
         all_morpho_file = os.path.join(output_dir, "All_Morphometrics.csv")
         df_out.to_csv(all_morpho_file, index=False)
+
 
 
     # Clean up tmp folder
