@@ -98,37 +98,176 @@ if __name__ == "__main__":
         swc_base = os.path.splitext(swc_filename)[0]
 
         per_tag_dfs = {}
-        for tag in tags:
-            feature_dfs = []
-            tag_dir = os.path.join(output_dir, TAG_LABELS.get(tag, f"tag_{tag}"))
-            os.makedirs(tag_dir, exist_ok=True)
-            for feature_name, feature_flags in features.items():
-                feature_flags_formatted = (
-                    feature_flags.replace("{TAG}", tag)
-                    if "{TAG}" in feature_flags else feature_flags
-                )
-                temp_output_path = os.path.join(tmp_dir, f"{swc_base}_{feature_name}_{tag}.csv")
-                lmin_path = os.path.join(tmp_dir, "Lmin.txt")
-                param_lines = f"{feature_flags_formatted}\n-s{temp_output_path} -R\n{swc_path}\n"
-                with open(lmin_path, "w") as f:
-                    f.write(param_lines)
-                subprocess.run([lm_exe_path, lmin_path], capture_output=True, text=True)
-                if os.path.exists(temp_output_path):
-                    try:
-                        df_raw = pd.read_csv(temp_output_path, header=None)
-                        df_clean = df_raw[pd.to_numeric(df_raw[0], errors='coerce').notna()]
-                        df_clean.columns = [feature_name]
-                        feature_dfs.append(df_clean.reset_index(drop=True))
-                    except Exception:
-                        pass
-            if feature_dfs:
-                df_tag = pd.concat(feature_dfs, axis=1)
-                if features_mode in ['branch', 'combined']:
-                    # Save branch-by-branch per tag
+
+        # ---- Only generate branch-by-branch files if needed ----
+        if features_mode in ['branch', 'combined']:
+            for tag in tags:
+                feature_dfs = []
+                tag_dir = os.path.join(output_dir, TAG_LABELS.get(tag, f"tag_{tag}"))
+                os.makedirs(tag_dir, exist_ok=True)
+                for feature_name, feature_flags in features.items():
+                    feature_flags_formatted = (
+                        feature_flags.replace("{TAG}", tag)
+                        if "{TAG}" in feature_flags else feature_flags
+                    )
+                    temp_output_path = os.path.join(tmp_dir, f"{swc_base}_{feature_name}_{tag}.csv")
+                    lmin_path = os.path.join(tmp_dir, "Lmin.txt")
+                    param_lines = f"{feature_flags_formatted}\n-s{temp_output_path} -R\n{swc_path}\n"
+                    with open(lmin_path, "w") as f:
+                        f.write(param_lines)
+                    subprocess.run([lm_exe_path, lmin_path], capture_output=True, text=True)
+                    if os.path.exists(temp_output_path):
+                        try:
+                            df_raw = pd.read_csv(temp_output_path, header=None)
+                            df_clean = df_raw[pd.to_numeric(df_raw[0], errors='coerce').notna()]
+                            df_clean.columns = [feature_name]
+                            feature_dfs.append(df_clean.reset_index(drop=True))
+                        except Exception:
+                            pass
+                if feature_dfs:
+                    df_tag = pd.concat(feature_dfs, axis=1)
                     morpho_outfile = os.path.join(tag_dir, f"Branch_Morphometrics_{swc_base}.csv")
                     df_tag.to_csv(morpho_outfile, index=False)
-                per_tag_dfs[tag] = df_tag
-                # ---- Compute per-tag summary ----
+                    per_tag_dfs[tag] = df_tag
+                    # Per-tag summary (used only for All_Morphometrics.csv if needed)
+                    summary = {}
+                    logic = {
+                        "Soma_Surface":        ("first",   "Soma_Surface"),
+                        "N_stems":             ("sum",     "N_stems"),
+                        "N_bifs":              ("sum",     "N_bifs"),
+                        "N_branch":            ("sum",     "N_branch"),
+                        "N_tips":              ("sum",     "N_tips"),
+                        "Width":               ("sum",     "Width"),
+                        "Height":              ("sum",     "Height"),
+                        "Depth":               ("sum",     "Depth"),
+                        "Diameter":            ("mean",    "Diameter"),
+                        "Length":              ("sum",     "Length"),
+                        "Surface":             ("sum",     "Surface"),
+                        "Volume":              ("sum",     "Volume"),
+                        "EucDistance":         ("max",     "EucDistance"),
+                        "PathDistance":        ("max",     "PathDistance"),
+                        "Branch_Order":        ("max",     "Branch_Order"),
+                        "Branch_pathlength":   ("sum",     "Branch_pathlength"),
+                        "Contraction":         ("mean",    "Contraction"),
+                        "Fragmentation":       ("sum",     "Fragmentation"),
+                        "Partition_asymmetry": ("mean",    "Partition_asymmetry"),
+                        "Pk_classic":          ("mean",    "Pk_classic"),
+                        "Bif_ampl_local":      ("mean",    "Bif_ampl_local"),
+                        "Bif_ampl_remote":     ("mean",    "Bif_ampl_remote"),
+                        "Bif_tilt_local":      ("mean",    "Bif_tilt_local"),
+                        "Bif_tilt_remote":     ("mean",    "Bif_tilt_remote"),
+                        "Bif_torque_local":    ("mean",    "Bif_torque_local"),
+                        "Bif_torque_remote":   ("mean",    "Bif_torque_remote"),
+                        "Helix":               ("mean",    "Helix"),
+                        "Fractal_Dim":         ("mean",    "Fractal_Dim"),
+                    }
+                    for col, (op, out_label) in logic.items():
+                        if col in df_tag.columns:
+                            col_numeric = pd.to_numeric(df_tag[col], errors="coerce")
+                            if op == "sum":
+                                summary[out_label] = col_numeric.sum()
+                            elif op == "mean":
+                                summary[out_label] = col_numeric.mean()
+                            elif op == "max":
+                                summary[out_label] = col_numeric.max()
+                            elif op == "first":
+                                summary[out_label] = col_numeric.iloc[0] if not col_numeric.empty else None
+                    if "EucDistance" in df_tag.columns:
+                        summary["Sum_EucDistance"] = pd.to_numeric(df_tag["EucDistance"], errors="coerce").sum()
+                    if "PathDistance" in df_tag.columns:
+                        summary["Sum_PathDistance"] = pd.to_numeric(df_tag["PathDistance"], errors="coerce").sum()
+                    summary["ABEL"] = abel(df_tag, "Branch_pathlength", "Contraction")
+                    summary["ABEL_Terminal"] = abel(df_tag, "Branch_pathlength_terminal", "Contraction_terminal")
+                    summary["ABEL_internal"] = abel(df_tag, "Branch_pathlength_internal", "Contraction_internal")
+                    summary["BAPL"] = bapl(df_tag, "Branch_pathlength")
+                    summary["BAPL_Terminal"] = bapl(df_tag, "Branch_pathlength_terminal")
+                    summary["BAPL_Internal"] = bapl(df_tag, "Branch_pathlength_internal")
+                    all_summaries[tag][swc_filename] = summary
+
+        # ---- For All_Morphometrics.csv summary (in 'all' or 'combined' mode) ----
+        if features_mode in ['all', 'combined']:
+            # If per_tag_dfs not built yet (in 'all' mode), build only in memory, don't write branch CSVs or subfolders
+            if features_mode == 'all':
+                for tag in tags:
+                    feature_dfs = []
+                    for feature_name, feature_flags in features.items():
+                        feature_flags_formatted = (
+                            feature_flags.replace("{TAG}", tag)
+                            if "{TAG}" in feature_flags else feature_flags
+                        )
+                        temp_output_path = os.path.join(tmp_dir, f"{swc_base}_{feature_name}_{tag}.csv")
+                        lmin_path = os.path.join(tmp_dir, "Lmin.txt")
+                        param_lines = f"{feature_flags_formatted}\n-s{temp_output_path} -R\n{swc_path}\n"
+                        with open(lmin_path, "w") as f:
+                            f.write(param_lines)
+                        subprocess.run([lm_exe_path, lmin_path], capture_output=True, text=True)
+                        if os.path.exists(temp_output_path):
+                            try:
+                                df_raw = pd.read_csv(temp_output_path, header=None)
+                                df_clean = df_raw[pd.to_numeric(df_raw[0], errors='coerce').notna()]
+                                df_clean.columns = [feature_name]
+                                feature_dfs.append(df_clean.reset_index(drop=True))
+                            except Exception:
+                                pass
+                    if feature_dfs:
+                        df_tag = pd.concat(feature_dfs, axis=1)
+                        per_tag_dfs[tag] = df_tag
+                        # Per-tag summary (used only for All_Morphometrics.csv if needed)
+                        summary = {}
+                        logic = {
+                            "Soma_Surface":        ("first",   "Soma_Surface"),
+                            "N_stems":             ("sum",     "N_stems"),
+                            "N_bifs":              ("sum",     "N_bifs"),
+                            "N_branch":            ("sum",     "N_branch"),
+                            "N_tips":              ("sum",     "N_tips"),
+                            "Width":               ("sum",     "Width"),
+                            "Height":              ("sum",     "Height"),
+                            "Depth":               ("sum",     "Depth"),
+                            "Diameter":            ("mean",    "Diameter"),
+                            "Length":              ("sum",     "Length"),
+                            "Surface":             ("sum",     "Surface"),
+                            "Volume":              ("sum",     "Volume"),
+                            "EucDistance":         ("max",     "EucDistance"),
+                            "PathDistance":        ("max",     "PathDistance"),
+                            "Branch_Order":        ("max",     "Branch_Order"),
+                            "Branch_pathlength":   ("sum",     "Branch_pathlength"),
+                            "Contraction":         ("mean",    "Contraction"),
+                            "Fragmentation":       ("sum",     "Fragmentation"),
+                            "Partition_asymmetry": ("mean",    "Partition_asymmetry"),
+                            "Pk_classic":          ("mean",    "Pk_classic"),
+                            "Bif_ampl_local":      ("mean",    "Bif_ampl_local"),
+                            "Bif_ampl_remote":     ("mean",    "Bif_ampl_remote"),
+                            "Bif_tilt_local":      ("mean",    "Bif_tilt_local"),
+                            "Bif_tilt_remote":     ("mean",    "Bif_tilt_remote"),
+                            "Bif_torque_local":    ("mean",    "Bif_torque_local"),
+                            "Bif_torque_remote":   ("mean",    "Bif_torque_remote"),
+                            "Helix":               ("mean",    "Helix"),
+                            "Fractal_Dim":         ("mean",    "Fractal_Dim"),
+                        }
+                        for col, (op, out_label) in logic.items():
+                            if col in df_tag.columns:
+                                col_numeric = pd.to_numeric(df_tag[col], errors="coerce")
+                                if op == "sum":
+                                    summary[out_label] = col_numeric.sum()
+                                elif op == "mean":
+                                    summary[out_label] = col_numeric.mean()
+                                elif op == "max":
+                                    summary[out_label] = col_numeric.max()
+                                elif op == "first":
+                                    summary[out_label] = col_numeric.iloc[0] if not col_numeric.empty else None
+                        if "EucDistance" in df_tag.columns:
+                            summary["Sum_EucDistance"] = pd.to_numeric(df_tag["EucDistance"], errors="coerce").sum()
+                        if "PathDistance" in df_tag.columns:
+                            summary["Sum_PathDistance"] = pd.to_numeric(df_tag["PathDistance"], errors="coerce").sum()
+                        summary["ABEL"] = abel(df_tag, "Branch_pathlength", "Contraction")
+                        summary["ABEL_Terminal"] = abel(df_tag, "Branch_pathlength_terminal", "Contraction_terminal")
+                        summary["ABEL_internal"] = abel(df_tag, "Branch_pathlength_internal", "Contraction_internal")
+                        summary["BAPL"] = bapl(df_tag, "Branch_pathlength")
+                        summary["BAPL_Terminal"] = bapl(df_tag, "Branch_pathlength_terminal")
+                        summary["BAPL_Internal"] = bapl(df_tag, "Branch_pathlength_internal")
+                        all_summaries[tag][swc_filename] = summary
+            if per_tag_dfs:
+                df_combined = pd.concat(list(per_tag_dfs.values()), axis=0, ignore_index=True)
                 summary = {}
                 logic = {
                     "Soma_Surface":        ("first",   "Soma_Surface"),
@@ -161,8 +300,8 @@ if __name__ == "__main__":
                     "Fractal_Dim":         ("mean",    "Fractal_Dim"),
                 }
                 for col, (op, out_label) in logic.items():
-                    if col in df_tag.columns:
-                        col_numeric = pd.to_numeric(df_tag[col], errors="coerce")
+                    if col in df_combined.columns:
+                        col_numeric = pd.to_numeric(df_combined[col], errors="coerce")
                         if op == "sum":
                             summary[out_label] = col_numeric.sum()
                         elif op == "mean":
@@ -171,59 +310,43 @@ if __name__ == "__main__":
                             summary[out_label] = col_numeric.max()
                         elif op == "first":
                             summary[out_label] = col_numeric.iloc[0] if not col_numeric.empty else None
-                if "EucDistance" in df_tag.columns:
-                    summary["Sum_EucDistance"] = pd.to_numeric(df_tag["EucDistance"], errors="coerce").sum()
-                if "PathDistance" in df_tag.columns:
-                    summary["Sum_PathDistance"] = pd.to_numeric(df_tag["PathDistance"], errors="coerce").sum()
-                summary["ABEL"] = abel(df_tag, "Branch_pathlength", "Contraction")
-                summary["ABEL_Terminal"] = abel(df_tag, "Branch_pathlength_terminal", "Contraction_terminal")
-                summary["ABEL_internal"] = abel(df_tag, "Branch_pathlength_internal", "Contraction_internal")
-                summary["BAPL"] = bapl(df_tag, "Branch_pathlength")
-                summary["BAPL_Terminal"] = bapl(df_tag, "Branch_pathlength_terminal")
-                summary["BAPL_Internal"] = bapl(df_tag, "Branch_pathlength_internal")
-                all_summaries[tag][swc_filename] = summary
-
-        # --------- Combined summary (no combined_tags folder!) ---------
-        if per_tag_dfs and features_mode in ['all', 'combined']:
-            df_combined = pd.concat(list(per_tag_dfs.values()), axis=0, ignore_index=True)
-            summary = {}
-            for col, (op, out_label) in logic.items():
-                if col in df_combined.columns:
-                    col_numeric = pd.to_numeric(df_combined[col], errors="coerce")
-                    if op == "sum":
-                        summary[out_label] = col_numeric.sum()
-                    elif op == "mean":
-                        summary[out_label] = col_numeric.mean()
-                    elif op == "max":
-                        summary[out_label] = col_numeric.max()
-                    elif op == "first":
-                        summary[out_label] = col_numeric.iloc[0] if not col_numeric.empty else None
-            if "EucDistance" in df_combined.columns:
-                summary["Sum_EucDistance"] = pd.to_numeric(df_combined["EucDistance"], errors="coerce").sum()
-            if "PathDistance" in df_combined.columns:
-                summary["Sum_PathDistance"] = pd.to_numeric(df_combined["PathDistance"], errors="coerce").sum()
-            summary["ABEL"] = abel(df_combined, "Branch_pathlength", "Contraction")
-            summary["ABEL_Terminal"] = abel(df_combined, "Branch_pathlength_terminal", "Contraction_terminal")
-            summary["ABEL_internal"] = abel(df_combined, "Branch_pathlength_internal", "Contraction_internal")
-            summary["BAPL"] = bapl(df_combined, "Branch_pathlength")
-            summary["BAPL_Terminal"] = bapl(df_combined, "Branch_pathlength_terminal")
-            summary["BAPL_Internal"] = bapl(df_combined, "Branch_pathlength_internal")
-            all_summaries_combined[swc_filename] = summary
+                if "EucDistance" in df_combined.columns:
+                    summary["Sum_EucDistance"] = pd.to_numeric(df_combined["EucDistance"], errors="coerce").sum()
+                if "PathDistance" in df_combined.columns:
+                    summary["Sum_PathDistance"] = pd.to_numeric(df_combined["PathDistance"], errors="coerce").sum()
+                summary["ABEL"] = abel(df_combined, "Branch_pathlength", "Contraction")
+                summary["ABEL_Terminal"] = abel(df_combined, "Branch_pathlength_terminal", "Contraction_terminal")
+                summary["ABEL_internal"] = abel(df_combined, "Branch_pathlength_internal", "Contraction_internal")
+                summary["BAPL"] = bapl(df_combined, "Branch_pathlength")
+                summary["BAPL_Terminal"] = bapl(df_combined, "Branch_pathlength_terminal")
+                summary["BAPL_Internal"] = bapl(df_combined, "Branch_pathlength_internal")
+                all_summaries_combined[swc_filename] = summary
 
     # ---- Build and save the All_Morphometrics.csv ----
     if features_mode in ['all', 'combined'] and all_summaries_combined:
         neuron_names = sorted(all_summaries_combined.keys())
         result_frames = []
+        single_tag_mode = (len(tags) == 1)
         for neuron in neuron_names:
             data = {}
             comb = all_summaries_combined[neuron]
             data["combined"] = comb
-            for tag in tags:
-                tag_label = TAG_LABELS.get(tag, f"tag_{tag}")
-                val = all_summaries[tag].get(neuron, {})
+            # For single tag, only include the relevant tag
+            tag_columns = []
+            if single_tag_mode:
+                tag_label = TAG_LABELS.get(tags[0], f"tag_{tags[0]}")
+                tag_columns = [tag_label]
+                val = all_summaries[tags[0]].get(neuron, {})
                 data[tag_label] = val
+            else:
+                # Multi-tag: include all tags
+                for tag in tags:
+                    tag_label = TAG_LABELS.get(tag, f"tag_{tag}")
+                    tag_columns.append(tag_label)
+                    val = all_summaries[tag].get(neuron, {})
+                    data[tag_label] = val
             df = pd.DataFrame(data)
-            df.columns = ["combined"] + [TAG_LABELS.get(tag, f"tag_{tag}") for tag in tags]
+            df.columns = ["combined"] + tag_columns
             df.insert(0, "Features", df.index)
             df.reset_index(drop=True, inplace=True)
             df["Neuron"] = neuron
@@ -232,11 +355,14 @@ if __name__ == "__main__":
         df_out = pd.DataFrame({"Features": all_features})
         for df in result_frames:
             neuron = df["Neuron"][0].replace(".swc", "")
-            for col in ["combined"] + [TAG_LABELS.get(tag, f"tag_{tag}") for tag in tags]:
+            # Only include the columns needed for the current mode
+            cols_for_this = ["combined"] + ([TAG_LABELS.get(tags[0], f"tag_{tags[0]}")] if single_tag_mode else [TAG_LABELS.get(tag, f"tag_{tag}") for tag in tags])
+            for col in cols_for_this:
                 df1 = df.set_index("Features")[col]
                 df_out[f"{neuron}_{col}"] = df1.reindex(all_features).values
         all_morpho_file = os.path.join(output_dir, "All_Morphometrics.csv")
         df_out.to_csv(all_morpho_file, index=False)
+
 
     # Clean up tmp folder
     for fname in os.listdir(tmp_dir):
@@ -245,4 +371,3 @@ if __name__ == "__main__":
                 os.remove(os.path.join(tmp_dir, fname))
             except Exception:
                 pass
-
