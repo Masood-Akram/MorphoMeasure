@@ -325,51 +325,81 @@ if __name__ == "__main__":
     # ---- Build and save the All_Morphometrics.csv ----
     if features_mode in ['all', 'combined'] and all_summaries_combined:
         neuron_names = sorted(all_summaries_combined.keys())
-        result_frames = []
-        single_tag_mode = (len(tags) == 1)
-        for neuron in neuron_names:
-            data = {}
-            if single_tag_mode:
-                # Only the tag's measurements, not combined
-                tag_label = TAG_LABELS.get(tags[0], f"tag_{tags[0]}")
-                val = all_summaries[tags[0]].get(neuron, {})
-                data[tag_label] = val
-                df = pd.DataFrame(data)
-                df.columns = [tag_label]
-                df.insert(0, "Features", df.index)
-                df.reset_index(drop=True, inplace=True)
-                df["Neuron"] = neuron
-                result_frames.append(df)
-            else:
-                # Multi-tag: include combined and all tags
-                comb = all_summaries_combined[neuron]
-                data["combined"] = comb
-                tag_columns = []
-                for tag in tags:
-                    tag_label = TAG_LABELS.get(tag, f"tag_{tag}")
-                    tag_columns.append(tag_label)
-                    val = all_summaries[tag].get(neuron, {})
-                    data[tag_label] = val
-                df = pd.DataFrame(data)
-                df.columns = ["combined"] + tag_columns
-                df.insert(0, "Features", df.index)
-                df.reset_index(drop=True, inplace=True)
-                df["Neuron"] = neuron
-                result_frames.append(df)
         all_features = output_order
-        df_out = pd.DataFrame({"Features": all_features})
-        for df in result_frames:
-            neuron = df["Neuron"][0].replace(".swc", "")
-            if single_tag_mode:
-                tag_label = TAG_LABELS.get(tags[0], f"tag_{tags[0]}")
-                df1 = df.set_index("Features")[tag_label]
-                df_out[f"{neuron}_{tag_label}"] = df1.reindex(all_features).values
-            else:
-                for col in ["combined"] + [TAG_LABELS.get(tag, f"tag_{tag}") for tag in tags]:
-                    df1 = df.set_index("Features")[col]
-                    df_out[f"{neuron}_{col}"] = df1.reindex(all_features).values
-        all_morpho_file = os.path.join(output_dir, "All_Morphometrics.csv")
-        df_out.to_csv(all_morpho_file, index=False)
+
+        def build_df_out(result_frames, column_name_func):
+            df_out = pd.DataFrame({"Features": all_features})
+            for df, neuron in result_frames:
+                colname = column_name_func(df, neuron)
+                df1 = df.set_index("Features")[df.columns[1]]
+                df_out[colname] = df1.reindex(all_features).values
+            return df_out
+
+        # GLIA (tag 7.0) special: Only write per-tag summary, never combined
+        only_glia = (len(tags) == 1 and tags[0] == "7.0")
+        contains_glia = "7.0" in tags
+
+        # Multi-tag with basal and apical dendrite (3.0, 4.0): produce three files
+        if set(tags) == {"3.0", "4.0"} and not contains_glia:
+            # 1. Combined
+            result_frames_combined = []
+            # Only "combined" column per neuron
+            for neuron in neuron_names:
+                comb = all_summaries_combined[neuron]
+                df = pd.DataFrame({"combined": comb})
+                df.insert(0, "Features", df.index)
+                df.reset_index(drop=True, inplace=True)
+                result_frames_combined.append((df, neuron))
+            df_out_combined = build_df_out(result_frames_combined, lambda df, n: f"{n.replace('.swc','')}_combined")
+            df_out_combined.to_csv(os.path.join(output_dir, "All_Morphometrics.csv"), index=False)
+
+            # 2. Basal
+            result_frames_basal = []
+            for neuron in neuron_names:
+                tag_label = TAG_LABELS["3.0"]
+                val = all_summaries["3.0"].get(neuron, {})
+                df = pd.DataFrame({tag_label: val})
+                df.insert(0, "Features", df.index)
+                df.reset_index(drop=True, inplace=True)
+                result_frames_basal.append((df, neuron))
+            df_out_basal = build_df_out(result_frames_basal, lambda df, n: f"{n.replace('.swc','')}_basal_dendrites")
+            df_out_basal.to_csv(os.path.join(output_dir, "All_Morphometrics_basal.csv"), index=False)
+
+            # 3. Apical
+            result_frames_apical = []
+            for neuron in neuron_names:
+                tag_label = TAG_LABELS["4.0"]
+                val = all_summaries["4.0"].get(neuron, {})
+                df = pd.DataFrame({tag_label: val})
+                df.insert(0, "Features", df.index)
+                df.reset_index(drop=True, inplace=True)
+                result_frames_apical.append((df, neuron))
+            df_out_apical = build_df_out(result_frames_apical, lambda df, n: f"{n.replace('.swc','')}_apical_dendrites")
+            df_out_apical.to_csv(os.path.join(output_dir, "All_Morphometrics_apical.csv"), index=False)
+
+        else:
+            # Single tag or any set with glia: Only produce one per-tag summary, no combined
+            for tag in tags:
+                tag_label = TAG_LABELS.get(tag, f"tag_{tag}")
+                result_frames = []
+                for neuron in neuron_names:
+                    val = all_summaries[tag].get(neuron, {})
+                    df = pd.DataFrame({tag_label: val})
+                    df.insert(0, "Features", df.index)
+                    df.reset_index(drop=True, inplace=True)
+                    result_frames.append((df, neuron))
+                # Output file name
+                if tag == "3.0":
+                    outname = "All_Morphometrics_basal.csv"
+                elif tag == "4.0":
+                    outname = "All_Morphometrics_apical.csv"
+                elif tag == "7.0":
+                    outname = "All_Morphometrics_glia.csv"
+                else:
+                    outname = f"All_Morphometrics_{tag_label}.csv"
+                df_out = build_df_out(result_frames, lambda df, n: f"{n.replace('.swc','')}_{tag_label}")
+                df_out.to_csv(os.path.join(output_dir, outname), index=False)
+
 
 
 
