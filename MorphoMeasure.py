@@ -1,7 +1,20 @@
 import os
+import sys
 import subprocess
 import pandas as pd
 import argparse
+
+# Get project root directory (where the script lives)
+PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
+
+# Set default paths relative to this project root
+swc_dir = os.path.join(PROJECT_ROOT, "swc_files")
+output_dir = os.path.join(PROJECT_ROOT, "Measurements")
+tmp_dir = os.path.join(PROJECT_ROOT, "tmp")
+lm_exe_path = os.path.join(PROJECT_ROOT, "Lm.exe")
+
+os.makedirs(output_dir, exist_ok=True)
+os.makedirs(tmp_dir, exist_ok=True)
 
 features = {
     "Soma_Surface": "-l1,2,8,1.0 -f0,0,0,10.0",
@@ -43,14 +56,6 @@ TAG_LABELS = {
     '4.0': 'apical_dendrites',
     '7.0': 'glia_processes'
 }
-
-swc_dir = r"C:\Users\MasoodAkram\Desktop\GitHub\MorphoMeasure\swc_files"
-output_dir = r"C:\Users\MasoodAkram\Desktop\GitHub\MorphoMeasure\Measurements"
-tmp_dir = r"C:\Users\MasoodAkram\Desktop\GitHub\MorphoMeasure\tmp"
-lm_exe_path = r"C:\Users\MasoodAkram\Desktop\GitHub\MorphoMeasure\Lm.exe"
-
-os.makedirs(output_dir, exist_ok=True)
-os.makedirs(tmp_dir, exist_ok=True)
 
 def abel(df, path_col, contract_col):
     if path_col in df.columns and contract_col in df.columns:
