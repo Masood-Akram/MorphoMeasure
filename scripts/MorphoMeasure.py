@@ -1,3 +1,4 @@
+from morphomeasure import LMeasureWrapper
 import os
 import sys
 import subprocess
