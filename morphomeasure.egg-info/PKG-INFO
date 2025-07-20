@@ -1,5 +1,5 @@
 Metadata-Version: 2.1
-Name: morphomeasure
+Name: MorphoMeasure
 Version: 0.1.0
 Summary: Python wrapper and CLI for L-Measure morphometric feature extraction
 Author: Masood Akram

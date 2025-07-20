@@ -3,7 +3,7 @@ from .lmwrapper import LMeasureWrapper
 
 def main():
     parser = argparse.ArgumentParser(description="MorphoMeasure CLI")
-    parser.add_argument('--tag', nargs='+', required=True, help='Tags to process (e.g., 3.0 4.0)')
+    parser.add_argument('--tag', nargs='+', required=True, help='Tags to process (e.g., 3.0 4.0 7.0)')
     parser.add_argument('--features', choices=['all', 'branch', 'combined'], default='all',
                         help='Which outputs to produce: all, branch, or combined')
     parser.add_argument('--swc_dir', default='swc_files', help='Directory with SWC files')
