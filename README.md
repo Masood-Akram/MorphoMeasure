@@ -32,7 +32,7 @@ MorphoMeasure is a Python package and command-line tool for automated extraction
 
 1. **Clone this repository:**
    ```sh
-   git clone https://github.com/yourusername/MorphoMeasure.git
+   git clone https://github.com/Masood-Akram/MorphoMeasure.git
    cd MorphoMeasure
    ```
 
