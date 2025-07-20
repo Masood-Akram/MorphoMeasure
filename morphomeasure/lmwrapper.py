@@ -3,9 +3,16 @@ import subprocess
 import pandas as pd
 import tempfile
 
+PACKAGE_ROOT = os.path.dirname(os.path.abspath(__file__))
+DEFAULT_LM_EXE = os.path.join(PACKAGE_ROOT, "..", "Lm", "Lm.exe")
+
 class LMeasureWrapper:
-    def __init__(self, lm_exe_path):
-        self.lm_exe_path = lm_exe_path
+    def __init__(self, lm_exe_path=None):
+        if lm_exe_path is None:
+            package_root = os.path.dirname(os.path.abspath(__file__))
+            self.lm_exe_path = os.path.join(package_root, "..", "Lm", "Lm.exe")
+        else:
+            self.lm_exe_path = lm_exe_path
 
     def extract_features(self, swc_file, features_dict, tag, tmp_dir):
         feature_arrays = {}

@@ -5,6 +5,8 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')
 from morphomeasure import LMeasureWrapper
 import pandas as pd
 import argparse
+from morphomeasure.features import features, TAG_LABELS, output_order, summary_logic
+
 
 # --- Correct project root ---
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))

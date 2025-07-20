@@ -4,6 +4,10 @@ import pandas as pd
 from morphomeasure.features import features, TAG_LABELS, output_order, summary_logic
 from .lmwrapper import LMeasureWrapper
 
+import os
+PACKAGE_ROOT = os.path.dirname(os.path.abspath(__file__))
+DEFAULT_LM_EXE = os.path.join(PACKAGE_ROOT, "..", "Lm", "Lm.exe")
+
 def abel(df, path_col, contract_col):
     if path_col in df.columns and contract_col in df.columns:
         p = pd.to_numeric(df[path_col], errors="coerce")
@@ -21,11 +25,18 @@ def main():
     parser.add_argument('--tag', nargs='+', required=True, help='Tags to process (e.g., 3.0 4.0 7.0)')
     parser.add_argument('--features', choices=['all', 'branch', 'combined'], default='all',
                         help='Which outputs to produce: all, branch, or combined')
-    parser.add_argument('--swc_dir', default='swc_files', help='Directory with SWC files')
-    parser.add_argument('--output_dir', default='Measurements', help='Output directory')
-    parser.add_argument('--tmp_dir', default='tmp', help='Temporary directory')
-    parser.add_argument('--lm_exe_path', default='Lm/Lm.exe', help='Path to L-Measure executable')
+    parser.add_argument('--swc_dir', required=True, help='Directory with input SWC files')
+    parser.add_argument('--output_dir', required=True, help='Directory to save output features')
+    parser.add_argument('--tmp_dir', default='tmp', help='Temporary directory (default: ./tmp)')
+    parser.add_argument(
+    '--lm_exe_path',
+    default=DEFAULT_LM_EXE,
+    help="Path to L-Measure executable (default: bundled with package)")
+
     args = parser.parse_args()
+
+    if not os.path.exists(args.swc_dir):
+        raise FileNotFoundError(f"Input SWC folder not found: {args.swc_dir}")
 
     os.makedirs(args.output_dir, exist_ok=True)
     os.makedirs(args.tmp_dir, exist_ok=True)
@@ -145,8 +156,7 @@ def main():
                 summary["BAPL_Internal"] = bapl(df_combined, "Branch_pathlength_internal")
                 all_summaries_combined[swc_filename] = summary
 
-    # --- After processing all files: Write All_Morphometrics summaries ---
-
+    # --- Write All_Morphometrics summaries ---
     if features_mode in ['all', 'combined'] and all_summaries_combined:
         neuron_names = sorted(all_summaries_combined.keys())
         all_features = output_order
