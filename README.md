@@ -148,8 +148,7 @@ MorphoMeasure/
 - [ ] Extract features with tag 7 (glia).
 - [ ] PCA on Height, Width, and Depth.
 - [ ] Pure Python feature extraction (no L-Measure dependency).
-- [ ] TREES toolbox integration (pending license check).
-- [ ] Separate measures for apical dendrites and neuronal trees.
+- [ ] Separate measures for apical & basal trees.
 
 ---
 
