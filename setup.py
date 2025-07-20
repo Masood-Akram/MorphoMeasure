@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 
 setup(
-    name="MorphoMeasure",
+    name="morphomeasure",
     version="0.1.0",
     description="Python wrapper and CLI for L-Measure morphometric feature extraction",
     author="Masood Akram",
@@ -13,7 +13,7 @@ setup(
     include_package_data=True,
     entry_points={
         'console_scripts': [
-            'MorphoMeasure=morphomeasure.cli:main'
+            'morphomeasure=morphomeasure.cli:main'
         ]
     },
 )

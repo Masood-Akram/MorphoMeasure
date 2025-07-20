@@ -1,12 +1,6 @@
 LICENSE
 README.md
 setup.py
-MorphoMeasure.egg-info/PKG-INFO
-MorphoMeasure.egg-info/SOURCES.txt
-MorphoMeasure.egg-info/dependency_links.txt
-MorphoMeasure.egg-info/entry_points.txt
-MorphoMeasure.egg-info/requires.txt
-MorphoMeasure.egg-info/top_level.txt
 morphomeasure/__init__.py
 morphomeasure/cli.py
 morphomeasure/lmwrapper.py

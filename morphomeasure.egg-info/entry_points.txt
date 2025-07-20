@@ -1,2 +1,2 @@
 [console_scripts]
-MorphoMeasure = morphomeasure.cli:main
+morphomeasure = morphomeasure.cli:main

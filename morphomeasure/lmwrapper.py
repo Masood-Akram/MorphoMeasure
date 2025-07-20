@@ -40,4 +40,3 @@ class LMeasureWrapper:
             feature_arrays[key] = arr
 
         return pd.DataFrame(feature_arrays)
-
