@@ -156,7 +156,7 @@ def main():
                 summary["BAPL_Internal"] = bapl(df_combined, "Branch_pathlength_internal")
                 all_summaries_combined[swc_filename] = summary
 
-    # --- Write All_Morphometrics summaries ---
+    # Write All_Morphometrics summaries
     if features_mode in ['all', 'combined'] and all_summaries_combined:
         neuron_names = sorted(all_summaries_combined.keys())
         all_features = output_order
