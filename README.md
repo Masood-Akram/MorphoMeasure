@@ -1,78 +1,135 @@
-# Here are the steps that will be performed moving forward. 
+# MorphoMeasure: Python Package & CLI Wrapper for L-Measure
 
-1. Extract features with tag 3 (basal), tag (apical) together, and give output altogether.
-2. Extract features with tag 3 (basal), tag (apical) separately, and give output separately.
-3. Extract features with tag 7 (glia), and should be specified in the package.
-4. PCA should be applied to only Height, Width, and Depth (takle help from a previous version). 
-5. Make a python package which will help run this without using L-measure and Java.
-6. Try to incorporate TREES toolbox features as well, but first check their licensing. 
+MorphoMeasure is a Python package and command-line tool for automated extraction and summarization of morphometric features from neuron morphology files (SWC format) using [L-Measure](http://cng.gmu.edu:8080/Lm/help/index.htm). It supports batch processing, flexible feature selection, tag-based extraction, and outputs results in convenient CSV formats for downstream analysis.
 
-
-# THIS PROJECT WILL BECOME A PYTHON PACKAGE BY THE WEEK OF 06/02/2025
-# USING THIS PYTHON PACKAGE, ONE CAN EXTRACT BRANCH BY BRANCH INFORMATION 
-# OF NEURONS ALONG WITH THE FEATURES MENTIONED IN NMO. 
-
-# ABOVE ARE THE CHANGES MADE. 
-
-# Try to work on the collection of features if you have time on 06/02/2025
-# Also think of adding TREES toolbox features
-# Antoher thing that can be added are the separate measures of apical dendrites based on tag 4
-# One more thing that you should consider adding are the measurements based on different neuronal trees. These trees will measure each stem separately
-
-# MorphoMeasure: Automated Morphometric Feature Extraction
-
-This repository provides a Python workflow for automated extraction of morphometric features from neuron morphology files (SWC format) using [L-Measure](http://cng.gmu.edu:8080/Lm/help/index.htm) (`Lm.exe`). The script processes multiple SWC files, extracts a comprehensive set of features, and saves the results as CSV files for downstream analysis.
+---
 
 ## Features
 
-- **Batch processing** of SWC files
-- Extraction of a wide range of morphometric features, including:
-  - Soma surface
-  - Number of stems, bifurcations, branches, tips
-  - Width, height, depth, diameter, length, surface, volume
-  - Euclidean and path distances
-  - Branch order, terminal degree
-  - Branch pathlength and contraction (including for terminal and internal branches)
-  - Fragmentation, partition asymmetry, bifurcation angles, and more
-- **Temporary file management** for clean workspace
-- **Customizable feature set** via the `features` dictionary
+- **Python Package & CLI:** Use as a library in your Python scripts or as a standalone command-line tool.
+- **Batch Processing:** Analyze multiple SWC files at once.
+- **Flexible Feature Extraction:** Extract all, branch-by-branch, or combined feature summaries.
+- **Tag Support:** Process basal (3.0), apical (4.0), glial (7.0), or custom tags for neuron compartments.
+- **Customizable Output:** Outputs per-branch and summary CSVs, organized by tag and neuron.
+- **Temporary File Management:** Cleans up intermediate files automatically.
+- **Extensible:** Easily add or modify features and summary logic.
+- **Ready for Extension:** Designed to incorporate additional tools (e.g., TREES toolbox) and new features.
+
+---
 
 ## Requirements
 
-- Python 3.x
-- [L-Measure](http://cng.gmu.edu:8080/Lm/help/index.htm) (`Lm.exe`) placed in the repository directory
-- `pandas` library
+- Python 3.9+
+- [L-Measure](http://cng.gmu.edu:8080/Lm/help/index.htm) (`Lm.exe`) placed in the `Lm` directory or specify its path
+- `pandas` (`pip install pandas`)
+
+---
+
+## Installation
+
+1. **Clone this repository:**
+   ```sh
+   git clone https://github.com/yourusername/MorphoMeasure.git
+   cd MorphoMeasure
+   ```
+
+2. **Install dependencies:**
+   ```sh
+   pip install pandas
+   ```
+
+3. **Place L-Measure executable:**
+   - Download `Lm.exe` from the [L-Measure website](http://cng.gmu.edu:8080/Lm/help/index.htm).
+   - Place it in the `Lm` directory (default), or specify its path with `--lm_exe_path`.
+
+---
 
 ## Usage
 
-1. **Place your SWC files** in the `swc_files` directory.
-2. **Configure paths** in the script if your directory structure is different.
-3. **Run the script** (e.g., in Jupyter Notebook or as a Python script):
+### As a CLI Tool
 
-   ```python
-   # In Jupyter Notebook, run all cells
-   # Or from command line:
-   python morphometric_extraction.ipynb
-   ```
+```sh
+python -m morphomeasure.cli \
+    --tag 3.0 4.0 \
+    --features combined \
+    --swc_dir ./swc_files \
+    --output_dir ./Measurements \
+    --tmp_dir ./tmp
+```
 
-4. **Results** will be saved in the `Measurements` directory, one CSV per SWC file.
+**Arguments:**
+
+| Argument           | Description                                                                                  | Example                                    |
+|--------------------|----------------------------------------------------------------------------------------------|--------------------------------------------|
+| `--tag`            | Tags to process (e.g., 3.0 for basal, 4.0 for apical, 7.0 for glia)                         | `--tag 3.0 4.0`                            |
+| `--features`       | Output type: `all`, `branch`, or `combined`                                                  | `--features all`                           |
+| `--swc_dir`        | Directory containing input SWC files                                                         | `--swc_dir ./swc_files`                    |
+| `--output_dir`     | Directory to save output CSVs                                                                | `--output_dir ./Measurements`              |
+| `--tmp_dir`        | Temporary directory for intermediate files (default: `./tmp`)                                | `--tmp_dir ./tmp`                          |
+| `--lm_exe_path`    | Path to L-Measure executable (default: bundled with package)                                 | `--lm_exe_path ./Lm/Lm.exe`                |
+
+### As a Python Package
+
+```python
+from morphomeasure import run_measurement
+
+run_measurement(
+    swc_dir="./swc_files",
+    output_dir="./Measurements",
+    tags=["3.0", "4.0"],
+    features_mode="combined",
+    lm_exe_path="./Lm/Lm.exe",
+    tmp_dir="./tmp"
+)
+```
+
+---
+
+## Output
+
+- **Branch-by-branch CSVs:**  
+  `Measurements/<tag_label>/Branch_Morphometrics_<neuron>.csv`
+- **Summary CSVs:**  
+  - `All_Morphometrics.csv` (combined)
+  - `All_Morphometrics_basal.csv`
+  - `All_Morphometrics_apical.csv`
+  - `All_Morphometrics_glia.csv`
+- **Temporary files:**  
+  Cleaned up automatically from the `tmp` directory.
+
+---
+
+## Customization
+
+- **Features:**  
+  Edit `features` in `morphomeasure/features.py` to add/remove L-Measure features.
+- **Summary Logic:**  
+  Edit `summary_logic` in `morphomeasure/features.py` to change how features are summarized (sum, mean, max, etc.).
+- **Tag Labels:**  
+  Update `TAG_LABELS` in `morphomeasure/features.py` for custom tag names.
+
+---
 
 ## Directory Structure
 
 ```
 MorphoMeasure/
-├── morphometric_extraction.ipynb
-├── Lm.exe
+├── morphomeasure/
+│   ├── cli.py
+│   ├── features.py
+│   └── ...
+├── Lm/
+│   └── Lm.exe
 ├── swc_files/
 │   └── *.swc
 ├── Measurements/
 │   └── Branch_Morphometrics_*.csv
 ├── tmp/
+├── README.md
+└── setup.py
 ```
 
-## Customizing Features
-
-Edit the `features` dictionary in the script to add, remove, or modify the features you want to extract. Each key is a feature name, and each value is the corresponding L-Measure command-line flags.
+---
 
 ## Notes
 
@@ -80,8 +137,29 @@ Edit the `features` dictionary in the script to add, remove, or modify the featu
 - Make sure `Lm.exe` is compatible with your system and accessible at the specified path.
 - For more information on L-Measure feature codes and options, see the [L-Measure documentation](http://cng.gmu.edu:8080/Lm/help/index.htm).
 
-## License
+---
 
-This project is provided under the MIT License.
+## Roadmap
+
+- [ ] Extract features with tag 3 (basal) and tag 4 (apical) together and separately.
+- [ ] Extract features with tag 7 (glia).
+- [ ] PCA on Height, Width, and Depth.
+- [ ] Pure Python feature extraction (no L-Measure dependency).
+- [ ] TREES toolbox integration (pending license check).
+- [ ] Separate measures for apical dendrites and neuronal trees.
 
 ---
+
+## License
+
+MIT License
+
+---
+
+## Acknowledgments
+
+- L-Measure: Center for Neural Informatics, Neural Structures, & Neural Plasticity, George Mason University
+
+---
+
+**For questions or contributions, please open an issue or pull request!**
