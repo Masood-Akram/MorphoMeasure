@@ -12,8 +12,7 @@ PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 swc_dir = os.path.join(PROJECT_ROOT, "swc_files")
 output_dir = os.path.join(PROJECT_ROOT, "Measurements")
 tmp_dir = os.path.join(PROJECT_ROOT, "tmp")
-lm_exe_path = os.path.join(PROJECT_ROOT, "Lm.exe")
-
+lm_exe_path = os.path.join(PROJECT_ROOT, "Lm", "Lm.exe")
 
 os.makedirs(output_dir, exist_ok=True)
 os.makedirs(tmp_dir, exist_ok=True)
