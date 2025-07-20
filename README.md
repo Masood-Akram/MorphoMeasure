@@ -74,16 +74,15 @@ python -m morphomeasure.cli \
 ### As a Python Package
 
 ```python
-from morphomeasure import run_measurement
-
-run_measurement(
-    swc_dir="./swc_files",
-    output_dir="./Measurements",
-    tags=["3.0", "4.0"],
-    features_mode="combined",
-    lm_exe_path="./Lm/Lm.exe",
-    tmp_dir="./tmp"
+from morphomeasure import LMeasureWrapper
+lm = LMeasureWrapper()
+df = lm.extract_features(
+    swc_file='/path/to/file.swc',
+    features_dict=features,      # import from morphomeasure.features
+    tag='3.0',
+    tmp_dir='tmp'
 )
+
 ```
 
 ---
