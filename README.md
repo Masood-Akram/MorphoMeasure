@@ -43,7 +43,7 @@ pip install -e .
 
 ## Requirements
 
-- Python 3.9+
+- Python 3.8+
 - [L-Measure](http://cng.gmu.edu:8080/Lm/help/index.htm) (`Lm.exe`) is bundled with the package
 - `pandas` (auto-installed)
 
