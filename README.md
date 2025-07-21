@@ -1,27 +1,47 @@
-# MorphoMeasure: Python Package & CLI Wrapper for L-Measure
+# MorphoMeasure
+
+Python Package & CLI Wrapper for L-Measure
 
 ![CI](https://github.com/Masood-Akram/MorphoMeasure/actions/workflows/python-package.yml/badge.svg)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Python Versions](https://img.shields.io/pypi/pyversions/morphomeasure.svg)](https://pypi.org/project/morphomeasure/)
 [![PyPI version](https://img.shields.io/pypi/v/morphomeasure.svg)](https://pypi.org/project/morphomeasure/)
+[![Downloads](https://static.pepy.tech/badge/morphomeasure)](https://pepy.tech/project/morphomeasure)
 
 
+*MorphoMeasure* is a Python package and command-line tool for automated extraction and summarization of morphometric features from neuron morphology files (SWC format) using [L-Measure](http://cng.gmu.edu:8080/Lm/help/index.htm). It supports batch processing, flexible feature selection, tag-based extraction, and outputs results in convenient CSV formats for downstream analysis.
 
 
-MorphoMeasure is a Python package and command-line tool for automated extraction and summarization of morphometric features from neuron morphology files (SWC format) using [L-Measure](http://cng.gmu.edu:8080/Lm/help/index.htm). It supports batch processing, flexible feature selection, tag-based extraction, and outputs results in convenient CSV formats for downstream analysis.
+---
+
+## Quick Install
+
+**From PyPI (recommended):**
+```bash
+pip install morphomeasure
+
+**Or for development:**
+```sh
+git clone https://github.com/Masood-Akram/MorphoMeasure.git
+cd MorphoMeasure
+pip install -e .
+
 
 ---
 
 ## Features
 
-- **Python Package & CLI:** Use as a library in your Python scripts or as a standalone command-line tool.
-- **Batch Processing:** Analyze multiple SWC files at once.
-- **Flexible Feature Extraction:** Extract all, branch-by-branch, or combined feature summaries.
-- **Tag Support:** Process basal (3.0), apical (4.0), glial (7.0), or custom tags for neuron compartments.
-- **Customizable Output:** Outputs per-branch and summary CSVs, organized by tag and neuron.
-- **Temporary File Management:** Cleans up intermediate files automatically.
-- **Extensible:** Easily add or modify features and summary logic.
-- **Ready for Extension:** Designed to incorporate additional tools (e.g., TREES toolbox) and new features.
+- **Python package & CLI for automated neuronal morphometric extraction using L-Measure** 
+- **Batch processing of many SWC files** 
+- **Outputs both branch-by-branch and summary morphometrics** 
+- **Handles dendritic (3.0, 4.0) and glial (7.0) tags** 
+- **Requires no Java or L-Measure installation—Lm.exe is bundled** 
+
+
+
+Cross-platform (tested: Windows, Linux, Mac)
+
+
 
 ---
 
