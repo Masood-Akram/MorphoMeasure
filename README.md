@@ -36,7 +36,7 @@ pip install -e .
 - **Batch processing of many SWC files** 
 - **Outputs both branch-by-branch and summary morphometrics** 
 - **Handles dendritic (3.0, 4.0) and glial (7.0) tags** 
-- **Requires no Java or L-Measure installation—Lm.exe is bundled** 
+- **Requires no Java or L-Measure installation - Lm.exe is bundled** 
 
 
 ---
