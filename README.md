@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="img/MorphoMeasure.png" alt="MorphoMeasure banner" width="500"/>
+  <img src="img/MorphoMeasure.png" alt="MorphoMeasure banner" width="1000"/>
 </p>
 
 
