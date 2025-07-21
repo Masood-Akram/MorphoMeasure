@@ -6,7 +6,6 @@ Python Package & CLI Wrapper for L-Measure
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Python Versions](https://img.shields.io/pypi/pyversions/morphomeasure.svg)](https://pypi.org/project/morphomeasure/)
 [![PyPI version](https://img.shields.io/pypi/v/morphomeasure.svg)](https://pypi.org/project/morphomeasure/)
-[![Downloads](https://static.pepy.tech/badge/morphomeasure)](https://pepy.tech/project/morphomeasure)
 
 
 *MorphoMeasure* is a Python package and command-line tool for automated extraction and summarization of morphometric features from neuron morphology files (SWC format) using [L-Measure](http://cng.gmu.edu:8080/Lm/help/index.htm). It supports batch processing, flexible feature selection, tag-based extraction, and outputs results in convenient CSV formats for downstream analysis.
@@ -19,6 +18,7 @@ Python Package & CLI Wrapper for L-Measure
 **From PyPI (recommended):**
 ```bash
 pip install morphomeasure
+```
 
 **Or for development:**
 ```sh
