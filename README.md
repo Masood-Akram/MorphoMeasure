@@ -21,10 +21,11 @@ pip install morphomeasure
 ```
 
 **Or for development:**
-```sh
+```bash
 git clone https://github.com/Masood-Akram/MorphoMeasure.git
 cd MorphoMeasure
 pip install -e .
+```
 
 
 ---
