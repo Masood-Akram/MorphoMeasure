@@ -39,51 +39,44 @@ pip install -e .
 - **Requires no Java or L-Measure installation—Lm.exe is bundled** 
 
 
-
-Cross-platform (tested: Windows, Linux, Mac)
-
-
-
 ---
 
 ## Requirements
 
 - Python 3.9+
-- [L-Measure](http://cng.gmu.edu:8080/Lm/help/index.htm) (`Lm.exe`) placed in the `Lm` directory or specify its path
-- `pandas` (`pip install pandas`)
-
----
-
-## Installation
-
-1. **Clone this repository:**
-   ```sh
-   git clone https://github.com/Masood-Akram/MorphoMeasure.git
-   cd MorphoMeasure
-   ```
-
-2. **Install dependencies:**
-   ```sh
-   pip install pandas
-   ```
-
-3. **Place L-Measure executable:**
-   - Download `Lm.exe` from the [L-Measure website](http://cng.gmu.edu:8080/Lm/help/index.htm).
-   - Place it in the `Lm` directory (default), or specify its path with `--lm_exe_path`.
+- [L-Measure](http://cng.gmu.edu:8080/Lm/help/index.htm) (`Lm.exe`) is bundled with the package
+- `pandas` (auto-installed)
 
 ---
 
 ## Usage
 
+### Python API
+
+```bash
+from morphomeasure import LMeasureWrapper
+from morphomeasure.features import features
+
+lm = LMeasureWrapper()  # Uses bundled Lm.exe by default
+df = lm.extract_features(
+    swc_file='/path/to/file.swc',
+    features_dict=features,
+    tag='3.0',
+    tmp_dir='tmp'
+)
+
+```
+
 ### As a CLI Tool
 
-```sh
-python -m morphomeasure.cli \
-    --tag 3.0 4.0 \
-    --features combined \
-    --swc_dir ./swc_files \
-    --output_dir ./Measurements \
-    --tmp_dir ./tmp
+```bash
+morphomeasure --tag 3.0 --features all --swc_dir /path/to/swc_files --output_dir /path/to/output
+```
+
+### All options:
+
+```bash
+morphomeasure --help
 ```
 
 **Arguments:**
@@ -97,21 +90,6 @@ python -m morphomeasure.cli \
 | `--tmp_dir`        | Temporary directory for intermediate files (default: `./tmp`)                                | `--tmp_dir ./tmp`                          |
 | `--lm_exe_path`    | Path to L-Measure executable (default: bundled with package)                                 | `--lm_exe_path ./Lm/Lm.exe`                |
 
-### As a Python Package
-
-```python
-from morphomeasure import LMeasureWrapper
-lm = LMeasureWrapper()
-df = lm.extract_features(
-    swc_file='/path/to/file.swc',
-    features_dict=features,      # import from morphomeasure.features
-    tag='3.0',
-    tmp_dir='tmp'
-)
-
-```
-
----
 
 ## Output
 
@@ -130,11 +108,11 @@ df = lm.extract_features(
 ## Customization
 
 - **Features:**  
-  Edit `features` in `morphomeasure/features.py` to add/remove L-Measure features.
+  Edit morphomeasure/features.py to add or remove L-Measure features.
 - **Summary Logic:**  
-  Edit `summary_logic` in `morphomeasure/features.py` to change how features are summarized (sum, mean, max, etc.).
+  Update the summary_logic dictionary in features.py.
 - **Tag Labels:**  
-  Update `TAG_LABELS` in `morphomeasure/features.py` for custom tag names.
+  Edit TAG_LABELS in features.py.
 
 ---
 
@@ -145,6 +123,7 @@ MorphoMeasure/
 ├── morphomeasure/
 │   ├── cli.py
 │   ├── features.py
+│   ├── lmwrapper.py
 │   └── ...
 ├── Lm/
 │   └── Lm.exe
@@ -154,16 +133,18 @@ MorphoMeasure/
 │   └── Branch_Morphometrics_*.csv
 ├── tmp/
 ├── README.md
-└── setup.py
+├── setup.py
+└── tests/
+    └── test_import.py
 ```
 
 ---
 
 ## Notes
 
-- The script creates and cleans up temporary files in the `tmp` directory.
-- Make sure `Lm.exe` is compatible with your system and accessible at the specified path.
-- For more information on L-Measure feature codes and options, see the [L-Measure documentation](http://cng.gmu.edu:8080/Lm/help/index.htm).
+- Temporary CSVs are cleaned up from tmp/ after processing.
+- Make sure Lm.exe is compatible with your OS (bundled version is for Windows).
+- For L-Measure feature details, see the [L-Measure documentation](http://cng.gmu.edu:8080/Lm/help/index.htm).
 
 ---
 
