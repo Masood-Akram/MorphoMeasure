@@ -17,6 +17,7 @@ morphomeasure.egg-info/top_level.txt
 morphomeasure/__pycache__/__init__.cpython-310.pyc
 morphomeasure/__pycache__/__init__.cpython-311.pyc
 morphomeasure/__pycache__/cli.cpython-310.pyc
+morphomeasure/__pycache__/cli.cpython-311.pyc
 morphomeasure/__pycache__/features.cpython-310.pyc
 morphomeasure/__pycache__/features.cpython-311.pyc
 morphomeasure/__pycache__/lmwrapper.cpython-310.pyc

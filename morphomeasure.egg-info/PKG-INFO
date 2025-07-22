@@ -1,4 +1,4 @@
-Metadata-Version: 2.4
+Metadata-Version: 2.1
 Name: morphomeasure
 Version: 0.1.0
 Summary: Python package and CLI for L-Measure-based morphometric extraction
@@ -7,20 +7,10 @@ Author: Masood Akram
 Author-email: masood.ahmed.akram@gmail.com
 Classifier: Programming Language :: Python :: 3
 Classifier: License :: OSI Approved :: MIT License
-Requires-Python: >=3.9
+Requires-Python: >=3.8
 Description-Content-Type: text/markdown
 License-File: LICENSE
 Requires-Dist: pandas
-Dynamic: author
-Dynamic: author-email
-Dynamic: classifier
-Dynamic: description
-Dynamic: description-content-type
-Dynamic: home-page
-Dynamic: license-file
-Dynamic: requires-dist
-Dynamic: requires-python
-Dynamic: summary
 
 <p align="center">
   <img src="img/MorphoMeasure.png" alt="MorphoMeasure banner" width="1000"/>
@@ -67,7 +57,7 @@ pip install -e .
 
 ## Requirements
 
-- Python 3.9+
+- Python 3.8+
 - [L-Measure](http://cng.gmu.edu:8080/Lm/help/index.htm) (`Lm.exe`) is bundled with the package
 - `pandas` (auto-installed)
 
@@ -92,9 +82,17 @@ df = lm.extract_features(
 ```
 
 ### As a CLI Tool
-
+# For neuron with both apical and basal dendrites (pyramidal neurons)
+```bash
+morphomeasure --tag 3.0 4.0 --features all --swc_dir /path/to/swc_files --output_dir /path/to/output
+```
+# For neuron with both only basal dendrites 
 ```bash
 morphomeasure --tag 3.0 --features all --swc_dir /path/to/swc_files --output_dir /path/to/output
+```
+# For glial processes 
+```bash
+morphomeasure --tag 7.0 --features all --swc_dir /path/to/swc_files --output_dir /path/to/output
 ```
 
 ### All options:
@@ -117,13 +115,23 @@ morphomeasure --help
 
 ## Output
 
+- **Complete structure CSVs:**  
+  `Measurements/<tag_label>/All_Morphemetrics.csv`
+
+- **Apical & Basal CSVs:**  
+  `Measurements/<tag_label>/All_Morphemetrics_apical.csv`
+  `Measurements/<tag_label>/All_Morphemetrics_basal.csv`
+
 - **Branch-by-branch CSVs:**  
   `Measurements/<tag_label>/Branch_Morphometrics_<neuron>.csv`
+
+
+
 - **Summary CSVs:**  
-  - `All_Morphometrics.csv` (combined)
-  - `All_Morphometrics_basal.csv`
-  - `All_Morphometrics_apical.csv`
-  - `All_Morphometrics_glia.csv`
+  - `All_Morphometrics.csv` (overall structure)
+  - `All_Morphometrics_basal.csv` (basal dendrites)
+  - `All_Morphometrics_apical.csv` (apical dendrites)
+  - `All_Morphometrics_glia.csv` (glial processes)
 - **Temporary files:**  
   Cleaned up automatically from the `tmp` directory.
 
