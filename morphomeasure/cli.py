@@ -63,8 +63,7 @@ def main():
                 df_tag = lm.extract_features(
                     swc_file=swc_path,
                     features_dict=features,
-                    tag=tag,
-                    tmp_dir=args.tmp_dir
+                    tag=tag
                 )
                 morpho_outfile = os.path.join(tag_dir, f"Branch_Morphometrics_{swc_base}.csv")
                 df_tag.to_csv(morpho_outfile, index=False)
@@ -102,8 +101,7 @@ def main():
                     df_tag = lm.extract_features(
                         swc_file=swc_path,
                         features_dict=features,
-                        tag=tag,
-                        tmp_dir=args.tmp_dir
+                        tag=tag
                     )
                     per_tag_dfs[tag] = df_tag
 
