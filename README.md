@@ -27,7 +27,6 @@ cd MorphoMeasure
 pip install -e .
 ```
 
-
 ---
 
 ## Features
@@ -55,14 +54,13 @@ pip install -e .
 
 ```bash
 from morphomeasure import LMeasureWrapper
-from morphomeasure.features import features
 
-lm = LMeasureWrapper()  # Uses bundled Lm.exe by default
-df = lm.extract_features(
-    swc_file='/path/to/file.swc',
-    features_dict=features,
-    tag='3.0',
-    tmp_dir='tmp'
+lm = LMeasureWrapper()
+lm.run_batch(
+    swc_dir='/path/to/swc-directory',
+    output_dir='/path/to/output-directory',
+    tags=['3.0'], # can be ['3.0', '4.0'] for apical & basal, and ['7.0'] for glia
+    features_mode=['all']   # can be ['all', 'branch'], or ['all', 'branch', 'combined']
 )
 
 ```
@@ -70,9 +68,8 @@ df = lm.extract_features(
 ### As a CLI Tool
 
 ```bash
-morphomeasure --tag 3.0 --features all --swc_dir /path/to/swc_files --output_dir /path/to/output
+morphomeasure --tag 3.0 4.0 --features all --swc_dir /path/to/swc_files --output_dir /path/to/output
 ```
-
 ### All options:
 
 ```bash
@@ -93,13 +90,23 @@ morphomeasure --help
 
 ## Output
 
+- **Complete structure CSVs:**  
+  `Measurements/<tag_label>/All_Morphemetrics.csv`
+
+- **Apical & Basal CSVs:**  
+  `Measurements/<tag_label>/All_Morphemetrics_apical.csv`
+  `Measurements/<tag_label>/All_Morphemetrics_basal.csv`
+
 - **Branch-by-branch CSVs:**  
   `Measurements/<tag_label>/Branch_Morphometrics_<neuron>.csv`
+
+
+
 - **Summary CSVs:**  
-  - `All_Morphometrics.csv` (combined)
-  - `All_Morphometrics_basal.csv`
-  - `All_Morphometrics_apical.csv`
-  - `All_Morphometrics_glia.csv`
+  - `All_Morphometrics.csv` (overall structure)
+  - `All_Morphometrics_basal.csv` (basal dendrites)
+  - `All_Morphometrics_apical.csv` (apical dendrites)
+  - `All_Morphometrics_glia.csv` (glial processes)
 - **Temporary files:**  
   Cleaned up automatically from the `tmp` directory.
 
@@ -113,30 +120,6 @@ morphomeasure --help
   Update the summary_logic dictionary in features.py.
 - **Tag Labels:**  
   Edit TAG_LABELS in features.py.
-
----
-
-## Directory Structure
-
-```
-MorphoMeasure/
-├── morphomeasure/
-│   ├── cli.py
-│   ├── features.py
-│   ├── lmwrapper.py
-│   └── ...
-├── Lm/
-│   └── Lm.exe
-├── swc_files/
-│   └── *.swc
-├── Measurements/
-│   └── Branch_Morphometrics_*.csv
-├── tmp/
-├── README.md
-├── setup.py
-└── tests/
-    └── test_import.py
-```
 
 ---
 
@@ -160,7 +143,37 @@ MorphoMeasure/
 
 ## License
 
-MIT License
+This project is licensed under the MIT License. See the `LICENSE` file for details.
+
+---
+
+## Citation
+
+If you use this repository in your research, please cite the associated papers:
+
+```BibTex
+@article{https://doi.org/10.1038/nprot.2008.51,
+  author = {Scorcioni, R., Polavaram, S., & Ascoli, G. A.},
+  doi = {https://doi.org/10.1038/nprot.2008.51},
+  journal = {Nature protocols},
+  number = {5},
+  pages = {866–-876},
+  title = {{L-Measure: a web-accessible tool for the analysis, comparison and search of digital reconstructions of neuronal morphologies}},
+  volume = {3},
+  year = {2008}
+}
+
+@article{https://doi.org/10.1002/jnr.25131,
+  author = {Akram, M. A., Wei, Q., & Ascoli, G. A.},
+  doi = {https://doi.org/10.1002/jnr.25131},
+  journal = {Journal of Neuroscience Research},
+  number = {1},
+  pages = {112--129},
+  title = {{Machine learning classification reveals robust morphometric biomarker of glial and neuronal arbors}},
+  volume = {101},
+  year = {2023}
+}
+```
 
 ---
 
