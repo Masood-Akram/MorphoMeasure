@@ -1,11 +1,12 @@
-<p align="center">
-  <img src="img/MorphoMeasure.png" alt="MorphoMeasure banner" width="1000"/>
-</p>
-
 ![CI](https://github.com/Masood-Akram/MorphoMeasure/actions/workflows/python-package.yml/badge.svg)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Python Versions](https://img.shields.io/pypi/pyversions/morphomeasure.svg)](https://pypi.org/project/morphomeasure/)
 [![PyPI version](https://img.shields.io/pypi/v/morphomeasure.svg)](https://pypi.org/project/morphomeasure/)
+
+
+<p align="center">
+  <img src="img/MorphoMeasure.png" alt="MorphoMeasure banner" width="1000"/>
+</p>
 
 
 *MorphoMeasure* is a Python package and command-line tool for automated extraction and summarization of morphometric features from neuron morphology files (SWC format) using [L-Measure](http://cng.gmu.edu:8080/Lm/help/index.htm). It supports batch processing, flexible feature selection, tag-based extraction, and outputs results in convenient CSV formats for downstream analysis. This package also supports the extraction of [ABEL](https://pubmed.ncbi.nlm.nih.gov/36196621/), a recently discovered morphometric feature. 
