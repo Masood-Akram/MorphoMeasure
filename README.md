@@ -15,7 +15,7 @@ A Python package and command-line tool for automated extraction and summarizatio
 
 ---
 
-## Quick Install
+# Quick Install
 
 **From PyPI (recommended):**
 ```bash
@@ -31,7 +31,7 @@ pip install -e .
 
 ---
 
-## Features
+# Features
 
 - **Python package & CLI for automated neuronal morphometric extraction using L-Measure** 
 - **Batch processing of many SWC files** 
@@ -42,7 +42,7 @@ pip install -e .
 
 ---
 
-## Requirements
+# Requirements
 
 - Python 3.8+
 - [L-Measure](http://cng.gmu.edu:8080/Lm/help/index.htm) (`Lm.exe`) is bundled with the package
@@ -50,7 +50,7 @@ pip install -e .
 
 ---
 
-## Usage
+# Usage
 
 ### Python API
 
@@ -90,7 +90,7 @@ morphomeasure --help
 | `--lm_exe_path`    | Path to L-Measure executable (default: bundled with package)                                 | `--lm_exe_path ./Lm/Lm.exe`                |
 
 
-## Output
+# Output
 
 - **Complete structure CSVs:**  
   `Measurements/<tag_label>/All_Morphemetrics.csv`
@@ -114,7 +114,7 @@ morphomeasure --help
 
 ---
 
-## Customization
+# Customization
 
 - **Features:**  
   Edit morphomeasure/features.py to add or remove L-Measure features.
@@ -125,7 +125,7 @@ morphomeasure --help
 
 ---
 
-## Notes
+# Notes
 
 - Temporary CSVs are cleaned up from tmp/ after processing.
 - Make sure Lm.exe is compatible with your OS (bundled version is for Windows).
@@ -133,7 +133,7 @@ morphomeasure --help
 
 ---
 
-## Roadmap
+# Roadmap
 
 - [ ] Extract features with tag 3 (basal) and tag 4 (apical) together and separately.
 - [ ] Extract features with tag 7 (glia).
@@ -143,13 +143,13 @@ morphomeasure --help
 
 ---
 
-## License
+# License
 
 This project is licensed under the MIT License. See the `LICENSE` file for details.
 
 ---
 
-## Citation
+# Citation
 
 If you use this repository in your research, please cite the associated papers:
 
@@ -179,7 +179,7 @@ If you use this repository in your research, please cite the associated papers:
 
 ---
 
-## Acknowledgments
+# Acknowledgments
 
 - L-Measure: Center for Neural Informatics, Neural Structures, & Neural Plasticity, George Mason University
 
