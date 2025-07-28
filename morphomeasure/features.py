@@ -1,4 +1,17 @@
 # morphomeasure/features.py
+"""
+This module defines feature extraction parameters, tag labels, output order, and summary logic for morphometric analysis.
+Attributes:
+    features (dict): Maps feature names to their corresponding extraction command strings, with optional {TAG} placeholders for tag-specific features.
+    TAG_LABELS (dict): Maps tag values to human-readable labels for different neuronal or glial structures.
+    output_order (list): Specifies the order in which features should appear in output summaries or reports.
+    summary_logic (dict): Maps feature names to a tuple specifying the aggregation method (e.g., 'sum', 'mean', 'max', 'first') and the corresponding feature key.
+Usage:
+    - Use `features` to retrieve the extraction command for a given feature.
+    - Use `TAG_LABELS` to interpret tag values in feature extraction.
+    - Use `output_order` to format output consistently.
+    - Use `summary_logic` to determine how to aggregate feature values across samples.
+"""
 
 features = {
     "Soma_Surface": "-l1,2,8,1.0 -f0,0,0,10.0",

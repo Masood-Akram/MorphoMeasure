@@ -8,6 +8,17 @@ import pandas as pd
 import argparse
 
 def abel(df, path_col, contract_col):
+    """
+    Calculates the mean of the element-wise product of two columns in a DataFrame.
+
+    Parameters:
+        df (pd.DataFrame): The DataFrame containing the data.
+        path_col (str): The name of the column representing the 'path' values.
+        contract_col (str): The name of the column representing the 'contract' values.
+
+    Returns:
+        float or None: The mean of the element-wise product of the two columns if both exist, otherwise None.
+    """
     if path_col in df.columns and contract_col in df.columns:
         p = pd.to_numeric(df[path_col], errors="coerce")
         c = pd.to_numeric(df[contract_col], errors="coerce")
@@ -15,11 +26,44 @@ def abel(df, path_col, contract_col):
     return None
 
 def bapl(df, col):
+    """
+    Calculates the mean of a specified column in a DataFrame after converting its values to numeric.
+
+    Parameters:
+        df (pandas.DataFrame): The DataFrame containing the data.
+        col (str): The name of the column to compute the mean for.
+
+    Returns:
+        float or None: The mean of the numeric values in the specified column, or None if the column does not exist.
+    """
     if col in df.columns:
         return pd.to_numeric(df[col], errors="coerce").mean()
     return None
 
 def main():
+    """
+    Main entry point for extracting morphometric features from SWC files using L-Measure.
+    This function parses command-line arguments to specify tags, features, input/output directories,
+    and L-Measure executable path. It processes SWC files in the input directory, extracts features
+    for specified tags, computes summary statistics, and writes results to output CSV files.
+    Command-line Arguments:
+        --tag: List of tags to process (e.g., 3.0 4.0 7.0). Required.
+        --features: Output mode ('all', 'branch', 'combined'). Default is 'all'.
+        --swc_dir: Directory containing SWC files. Required.
+        --output_dir: Directory to save output feature files. Required.
+        --tmp_dir: Temporary directory for intermediate files. Default is 'tmp'.
+        --lm_exe_path: Path to L-Measure executable. If not provided, uses bundled executable.
+    Workflow:
+        1. Validates input directories and prepares output and temporary directories.
+        2. For each SWC file:
+            - Extracts features for each specified tag using L-Measure.
+            - Computes branch-by-branch and/or summary statistics based on the selected mode.
+            - Writes branch-level and summary CSV files to output directory.
+        3. Aggregates and writes combined summary files for all neurons and tags.
+        4. Cleans up temporary files.
+    Raises:
+        FileNotFoundError: If the input SWC directory does not exist.
+    """
     parser = argparse.ArgumentParser(description="Extract morphometric features from SWC files using L-Measure.")
     parser.add_argument('--tag', nargs='+', required=True, help='Tags to process (e.g., 3.0 4.0 7.0)')
     parser.add_argument('--features', choices=['all', 'branch', 'combined'], default='all',
