@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="morphomeasure",
-    version="0.1.0",
+    version="0.1.1",
     description="Python package and CLI for L-Measure-based morphometric extraction",
     long_description=open("README.md").read(),
     long_description_content_type="text/markdown",
