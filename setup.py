@@ -1,4 +1,21 @@
 from setuptools import setup, find_packages
+"""
+Setup script for the MorphoMeasure package.
+This script uses setuptools to configure the installation of MorphoMeasure, a Python package and CLI for L-Measure-based morphometric extraction. It specifies package metadata, dependencies, entry points for the CLI, and other configuration options required for distribution and installation.
+Key parameters:
+- name: The package name.
+- version: Current version of the package.
+- description: Short summary of the package.
+- long_description: Detailed description loaded from README.md.
+- author and author_email: Package author information.
+- url: URL to the project's repository.
+- packages: Automatically discovered Python packages.
+- install_requires: List of required dependencies.
+- include_package_data: Whether to include additional files specified in MANIFEST.in.
+- entry_points: CLI entry point for the package.
+- classifiers: Metadata for PyPI and other tools.
+- python_requires: Minimum required Python version.
+"""
 
 setup(
     name="morphomeasure",
