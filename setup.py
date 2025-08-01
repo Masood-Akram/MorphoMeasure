@@ -19,7 +19,7 @@ Key parameters:
 
 setup(
     name="morphomeasure",
-    version="0.1.1",
+    version="0.1.2",
     description="Python package and CLI for L-Measure-based morphometric extraction",
     long_description=open("README.md").read(),
     long_description_content_type="text/markdown",
