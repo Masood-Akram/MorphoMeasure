@@ -7,7 +7,7 @@ from .features import features, TAG_LABELS, output_order, summary_logic
 def get_default_lm_exe():
     # Find where the morphomeasure package is actually installed
     import morphomeasure
-    PACKAGE_ROOT = os.path.dirname(os.path.abspath(morphomeasure.__file__))
+    PACKAGE_ROOT = os.path.dirname(os.path.abspath(__file__))
     lm_path = os.path.join(PACKAGE_ROOT, "..", "Lm", "Lm.exe")
     # On some systems, .. may not work if installed as a zipped egg/wheel
     # So, fall back to Lm inside morphomeasure if present
