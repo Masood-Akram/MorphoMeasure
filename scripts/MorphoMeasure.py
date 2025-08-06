@@ -111,9 +111,36 @@ def main():
                     tag=tag,
                     tmp_dir=args.tmp_dir
                 )
+                if "Branch_pathlength" in df_tag.columns and "Contraction" in df_tag.columns:
+                    df_tag["ABEL"] = pd.to_numeric(df_tag["Branch_pathlength"], errors="coerce") * pd.to_numeric(df_tag["Contraction"], errors="coerce")
+                if "Branch_pathlength_terminal" in df_tag.columns and "Contraction_terminal" in df_tag.columns:
+                    df_tag["ABEL_Terminal"] = pd.to_numeric(df_tag["Branch_pathlength_terminal"], errors="coerce") * pd.to_numeric(df_tag["Contraction_terminal"], errors="coerce")
+                if "Branch_pathlength_internal" in df_tag.columns and "Contraction_internal" in df_tag.columns:
+                    df_tag["ABEL_Internal"] = pd.to_numeric(df_tag["Branch_pathlength_internal"], errors="coerce") * pd.to_numeric(df_tag["Contraction_internal"], errors="coerce")
+
+                if "Branch_pathlength" in df_tag.columns:
+                    df_tag["BAPL"] = pd.to_numeric(df_tag["Branch_pathlength"], errors="coerce")
+                if "Branch_pathlength_terminal" in df_tag.columns:
+                    df_tag["BAPL_Terminal"] = pd.to_numeric(df_tag["Branch_pathlength_terminal"], errors="coerce")
+                if "Branch_pathlength_internal" in df_tag.columns:
+                    df_tag["BAPL_Internal"] = pd.to_numeric(df_tag["Branch_pathlength_internal"], errors="coerce")
+
+                # # Drop raw intermediate columns before saving
+                # cols_to_drop = [
+                #     "Branch_pathlength_terminal", "Contraction_terminal",
+                #     "Branch_pathlength_internal", "Contraction_internal"
+                # ]
+                # df_tag = df_tag.drop(columns=[col for col in cols_to_drop if col in df_tag.columns])
+
                 morpho_outfile = os.path.join(tag_dir, f"Branch_Morphometrics_{swc_base}.csv")
-                df_tag.to_csv(morpho_outfile, index=False)
-                per_tag_dfs[tag] = df_tag
+                # Create a copy for CSV output and drop unwanted columns
+                cols_to_drop = [
+                    "Branch_pathlength_terminal", "Contraction_terminal",
+                    "Branch_pathlength_internal", "Contraction_internal"
+                ]
+                df_out = df_tag.drop(columns=[col for col in cols_to_drop if col in df_tag.columns])
+                df_out.to_csv(morpho_outfile, index=False)
+                per_tag_dfs[tag] = df_tag  # keep full set (with all columns) for summary
 
                 # Summary logic
                 summary = {}
@@ -134,7 +161,7 @@ def main():
                     summary["Sum_PathDistance"] = pd.to_numeric(df_tag["PathDistance"], errors="coerce").sum()
                 summary["ABEL"] = abel(df_tag, "Branch_pathlength", "Contraction")
                 summary["ABEL_Terminal"] = abel(df_tag, "Branch_pathlength_terminal", "Contraction_terminal")
-                summary["ABEL_internal"] = abel(df_tag, "Branch_pathlength_internal", "Contraction_internal")
+                summary["ABEL_Internal"] = abel(df_tag, "Branch_pathlength_internal", "Contraction_internal")
                 summary["BAPL"] = bapl(df_tag, "Branch_pathlength")
                 summary["BAPL_Terminal"] = bapl(df_tag, "Branch_pathlength_terminal")
                 summary["BAPL_Internal"] = bapl(df_tag, "Branch_pathlength_internal")
@@ -170,7 +197,7 @@ def main():
                         summary["Sum_PathDistance"] = pd.to_numeric(df_tag["PathDistance"], errors="coerce").sum()
                     summary["ABEL"] = abel(df_tag, "Branch_pathlength", "Contraction")
                     summary["ABEL_Terminal"] = abel(df_tag, "Branch_pathlength_terminal", "Contraction_terminal")
-                    summary["ABEL_internal"] = abel(df_tag, "Branch_pathlength_internal", "Contraction_internal")
+                    summary["ABEL_Internal"] = abel(df_tag, "Branch_pathlength_internal", "Contraction_internal")
                     summary["BAPL"] = bapl(df_tag, "Branch_pathlength")
                     summary["BAPL_Terminal"] = bapl(df_tag, "Branch_pathlength_terminal")
                     summary["BAPL_Internal"] = bapl(df_tag, "Branch_pathlength_internal")
@@ -195,7 +222,7 @@ def main():
                     summary["Sum_PathDistance"] = pd.to_numeric(df_combined["PathDistance"], errors="coerce").sum()
                 summary["ABEL"] = abel(df_combined, "Branch_pathlength", "Contraction")
                 summary["ABEL_Terminal"] = abel(df_combined, "Branch_pathlength_terminal", "Contraction_terminal")
-                summary["ABEL_internal"] = abel(df_combined, "Branch_pathlength_internal", "Contraction_internal")
+                summary["ABEL_Internal"] = abel(df_combined, "Branch_pathlength_internal", "Contraction_internal")
                 summary["BAPL"] = bapl(df_combined, "Branch_pathlength")
                 summary["BAPL_Terminal"] = bapl(df_combined, "Branch_pathlength_terminal")
                 summary["BAPL_Internal"] = bapl(df_combined, "Branch_pathlength_internal")

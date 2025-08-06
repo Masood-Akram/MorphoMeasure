@@ -62,7 +62,7 @@ output_order = [
     "Branch_Order", "Branch_pathlength", "Contraction", "Fragmentation",
     "Partition_asymmetry", "Pk_classic", "Bif_ampl_local", "Bif_ampl_remote",
     "Bif_tilt_local", "Bif_tilt_remote", "Bif_torque_local", "Bif_torque_remote",
-    "Helix", "Fractal_Dim", "ABEL", "ABEL_Terminal", "ABEL_internal",
+    "Helix", "Fractal_Dim", "ABEL", "ABEL_Terminal", "ABEL_Internal",
     "BAPL", "BAPL_Terminal", "BAPL_Internal"
 ]
 
