@@ -1,25 +1,9 @@
 import argparse
 import os
 import pandas as pd
+
 from morphomeasure.features import features, TAG_LABELS, output_order, summary_logic
-from .lmwrapper import LMeasureWrapper
-
-import os
-import importlib.util
-import os
-
-def get_default_lm_exe():
-    # Find where the morphomeasure package is actually installed
-    import morphomeasure
-    PACKAGE_ROOT = os.path.dirname(os.path.abspath(__file__))
-    lm_path = os.path.join(PACKAGE_ROOT, "..", "Lm", "Lm.exe")
-    # On some systems, .. may not work if installed as a zipped egg/wheel
-    # So, fall back to Lm inside morphomeasure if present
-    if not os.path.exists(lm_path):
-        lm_path = os.path.join(PACKAGE_ROOT, "Lm", "Lm.exe")
-    return os.path.abspath(lm_path)
-
-DEFAULT_LM_EXE = get_default_lm_exe()
+from .lmwrapper import LMeasureWrapper, get_default_lm_exe
 
 
 def abel(df, path_col, contract_col):
@@ -90,18 +74,22 @@ def main():
     parser.add_argument('--swc_dir', required=True, help='Directory with input SWC files')
     parser.add_argument('--output_dir', required=True, help='Directory to save output features')
     parser.add_argument('--tmp_dir', default='tmp', help='Temporary directory (default: ./tmp)')
-    parser.add_argument('--lm_exe_path',
-                        default=DEFAULT_LM_EXE,
-                        help="Path to L-Measure executable (default: bundled with package)")
+    parser.add_argument(
+        '--lm_exe_path',
+        default=None,
+        help="Path to L-Measure executable (default: bundled with package)"
+    )
 
 
     args = parser.parse_args()
 
-    if not os.path.isfile(args.lm_exe_path):
+    lm_exe_path = args.lm_exe_path or get_default_lm_exe()
+
+    if not os.path.isfile(lm_exe_path):
         raise FileNotFoundError(
-            f"Lm.exe not found at {args.lm_exe_path}. "
+            f"Lm.exe not found at {lm_exe_path}. "
             "Please ensure it is included in your install or specify --lm_exe_path."
-    )
+        )
 
 
     if not os.path.exists(args.swc_dir):
@@ -110,7 +98,7 @@ def main():
     os.makedirs(args.output_dir, exist_ok=True)
     os.makedirs(args.tmp_dir, exist_ok=True)
 
-    lm = LMeasureWrapper(args.lm_exe_path)
+    lm = LMeasureWrapper(lm_exe_path)
     tags = args.tag
     features_mode = args.features
 

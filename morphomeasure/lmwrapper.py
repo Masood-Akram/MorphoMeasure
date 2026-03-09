@@ -5,15 +5,13 @@ import tempfile
 from .features import features, TAG_LABELS, output_order, summary_logic
 
 def get_default_lm_exe():
-    # Find where the morphomeasure package is actually installed
-    import morphomeasure
-    PACKAGE_ROOT = os.path.dirname(os.path.abspath(__file__))
-    lm_path = os.path.join(PACKAGE_ROOT, "..", "Lm", "Lm.exe")
-    # On some systems, .. may not work if installed as a zipped egg/wheel
-    # So, fall back to Lm inside morphomeasure if present
+    package_root = os.path.dirname(os.path.abspath(__file__))
+    lm_path = os.path.normpath(os.path.join(package_root, "Lm", "Lm.exe"))
+
     if not os.path.exists(lm_path):
-        lm_path = os.path.join(PACKAGE_ROOT, "Lm", "Lm.exe")
-    return os.path.abspath(lm_path)
+        raise FileNotFoundError(f"Bundled Lm.exe not found at: {lm_path}")
+
+    return lm_path
 
 DEFAULT_LM_EXE = get_default_lm_exe()
 
@@ -63,10 +61,12 @@ class LMeasureWrapper:
             lm_exe_path (str): The resolved path to the Lm.exe executable.
         """
         if lm_exe_path is None:
-            package_root = os.path.dirname(os.path.abspath(__file__))
-            self.lm_exe_path = os.path.join(package_root, "..", "Lm", "Lm.exe")
+            self.lm_exe_path = get_default_lm_exe()
         else:
-            self.lm_exe_path = lm_exe_path
+            self.lm_exe_path = os.path.normpath(lm_exe_path)
+
+        if not os.path.isfile(self.lm_exe_path):
+            raise FileNotFoundError(f"Lm.exe not found at: {self.lm_exe_path}")
 
     def extract_features(self, swc_file, features_dict, tag):
         """
@@ -103,13 +103,29 @@ class LMeasureWrapper:
                 param = f"{feature_flag}\n-s{out_path} -R\n{swc_file}\n"
                 with open(lmin_path, "w") as f:
                     f.write(param)
-                subprocess.run([self.lm_exe_path, lmin_path], capture_output=True, text=True)
+                result = subprocess.run(
+                    [self.lm_exe_path, lmin_path],
+                    capture_output=True,
+                    text=True,
+                    cwd=os.path.dirname(self.lm_exe_path)
+                )
+
+                if result.returncode != 0 and not os.path.exists(out_path):
+                    raise RuntimeError(
+                        f"L-Measure failed for feature '{feature_name}' on file '{swc_file}'.\n"
+                        f"Executable: {self.lm_exe_path}\n"
+                        f"STDOUT:\n{result.stdout}\n"
+                        f"STDERR:\n{result.stderr}"
+                    )
+
                 if os.path.exists(out_path):
                     try:
                         df = pd.read_csv(out_path, header=None)
-                        arr = df[pd.to_numeric(df[0], errors='coerce').notna()][0].tolist()
-                    except Exception:
-                        arr = [None]
+                        arr = df[pd.to_numeric(df[0], errors="coerce").notna()][0].tolist()
+                    except Exception as e:
+                        raise RuntimeError(
+                            f"Failed reading output CSV for feature '{feature_name}' from '{out_path}': {e}"
+                        )
                 else:
                     arr = [None]
                 feature_arrays[feature_name] = arr
